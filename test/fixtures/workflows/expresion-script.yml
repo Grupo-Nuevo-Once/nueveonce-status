@@ -1,0 +1,14 @@
+# Negative fixture for the "expresiones" rule: an issue title interpolated into github-script.
+name: Expresion en script
+on:
+  issues:
+    types: [opened]
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: core.info('${{ github.event.issue.title }}')

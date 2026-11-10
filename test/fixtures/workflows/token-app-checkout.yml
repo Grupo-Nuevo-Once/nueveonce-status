@@ -1,0 +1,26 @@
+# Negative fixture for the "token-app" rule: in the job that holds the App key, the checkout takes
+# its default token, GITHUB_TOKEN, a second token source next to the App's.
+name: Checkout sin el token de la App
+on: workflow_dispatch
+permissions: {}
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment: estado
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          github-token: ${{ steps.app_token.outputs.token }}
+          script: |
+            const { run } = require('./.github/scripts/incidente.js');
+            await run({ github, context, core });

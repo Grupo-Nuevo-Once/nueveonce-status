@@ -1,0 +1,66 @@
+# Translates the incidents that Upptime opens and closes into Spanish (.github/scripts/traducir.js).
+#
+# - Runs only on Upptime's own incidents: events sent by the App bot, on an issue labelled
+#   "status" plus one of the eight bare component slugs, and neither "manual" (incidente.yml posts
+#   as the same bot) nor "status-relay" (the internal alert relay). The script checks the same
+#   conditions again on a fresh read of the issue.
+# - Uses GITHUB_TOKEN, never the App key, so no event-triggered workflow can reach the key.
+#   Writes made with GITHUB_TOKEN start no workflow runs, so the translation never triggers itself.
+# - Reads the payload only through github-script's context: no expression is interpolated into
+#   the script.
+# - One concurrency group per issue, queued rather than cancelled. Every run reconciles the whole
+#   issue, so when GitHub drops a pending run the next one covers it.
+# - Listens to "labeled" as well as "opened", so the first comment does not hang on one payload.
+#   Upptime sets the labels in the same call that creates the issue and the condition below needs
+#   them, so whichever of these events first lists them does the work. The runs that follow find
+#   nothing left to do: the script posts "Investigando" and translates only once.
+
+name: Traducir incidentes
+on:
+  issues:
+    types: [opened, labeled, closed]
+  issue_comment:
+    types: [created]
+permissions: {}
+jobs:
+  traducir:
+    name: Traducir al español
+    if: >-
+      github.event.sender.login == 'nueveonce-estado[bot]'
+      && !github.event.issue.pull_request
+      && contains(github.event.issue.labels.*.name, 'status')
+      && !contains(github.event.issue.labels.*.name, 'manual')
+      && !contains(github.event.issue.labels.*.name, 'status-relay')
+      && (contains(github.event.issue.labels.*.name, 'api-signo')
+        || contains(github.event.issue.labels.*.name, 'dashboard-signo')
+        || contains(github.event.issue.labels.*.name, 'api-integraciones')
+        || contains(github.event.issue.labels.*.name, 'portal-desarrolladores')
+        || contains(github.event.issue.labels.*.name, 'telemedicina-web')
+        || contains(github.event.issue.labels.*.name, 'aqui-contigo-web')
+        || contains(github.event.issue.labels.*.name, 'app-pacientes-web')
+        || contains(github.event.issue.labels.*.name, 'encuestas'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # At job level, so runs that the condition above skips never queue in the group.
+    concurrency:
+      group: traducir-incidentes-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    # The one documented exception to the App being the only identity with write access: a job
+    # that holds no App key and runs no npm code may give GITHUB_TOKEN, its only token, write
+    # access to issues and pull requests, and nothing else.
+    permissions:
+      # Only for the checkout of the scripts; the repository is public anyway.
+      contents: read
+      issues: write
+    steps:
+      # Issue events always run the default branch's workflow and scripts.
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Translate the incident
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { run } = require('./.github/scripts/traducir.js');
+            await run({ github, context, core });

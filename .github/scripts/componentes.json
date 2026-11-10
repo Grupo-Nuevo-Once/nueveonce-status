@@ -1,0 +1,10 @@
+[
+  { "slug": "api-signo", "nombre": "API SIGNO" },
+  { "slug": "dashboard-signo", "nombre": "Dashboard SIGNO" },
+  { "slug": "api-integraciones", "nombre": "API de integraciones" },
+  { "slug": "portal-desarrolladores", "nombre": "Portal de desarrolladores" },
+  { "slug": "telemedicina-web", "nombre": "Telemedicina (web)" },
+  { "slug": "aqui-contigo-web", "nombre": "Aquí Contigo (web)" },
+  { "slug": "app-pacientes-web", "nombre": "App web de pacientes" },
+  { "slug": "encuestas", "nombre": "Encuestas" }
+]

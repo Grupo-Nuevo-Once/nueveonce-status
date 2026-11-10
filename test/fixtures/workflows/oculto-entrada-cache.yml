@@ -1,0 +1,23 @@
+# Negative fixture for the "codigo-oculto" rule: an action's own "cache" input restores a cache in
+# the job that holds the App key.
+name: Entrada cache con llave
+on: workflow_dispatch
+permissions: {}
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          token: ${{ steps.app_token.outputs.token }}

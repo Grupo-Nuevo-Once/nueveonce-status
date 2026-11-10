@@ -1,0 +1,16 @@
+# Negative fixture for the "llave" rule: the App key read in a job without the "estado"
+# environment.
+name: Llave sin estado
+on: workflow_dispatch
+permissions: {}
+jobs:
+  firmar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}

@@ -1,31 +1,241 @@
-# Change these first
-owner: upptime # Your GitHub organization or username, where this repository lives
-repo: upptime # The name of this repository
+# Upptime configuration for the NueveOnce public status page.
+# This repository is public: list only public endpoints, and never put "$" in a
+# site field, because Upptime substitutes environment variables (including the
+# bot token) into URLs, headers and body checks.
+owner: Grupo-Nuevo-Once
+repo: status
+user-agent: nueveonce-estado
+
+assignees: []
+secrets: []
+
+skipDescriptionUpdate: true
+skipTopicsUpdate: true
+skipHomepageUpdate: true
+skipPoweredByReadme: true
+skipDeleteIssues: true
+
+# Only the author is set. The commit messages keep Upptime's defaults because
+# Upptime and the site parse them.
+commitMessages:
+  commitAuthorName: "nueveonce-estado[bot]"
+  commitAuthorEmail: "355641071+nueveonce-estado[bot]@users.noreply.github.com"
 
 sites:
-  - name: Google
-    url: https://www.google.com
-  - name: Wikipedia
-    url: https://en.wikipedia.org
-  - name: Hacker News
-    url: https://news.ycombinator.com
-  - name: Secret Site
-    url: $SECRET_SITE
+  - name: API SIGNO
+    slug: api-signo
+    url: https://api.signo.nueveonce.com/api/health/ready
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: '"status":"ok"'
+    icon: https://grupo-nuevo-once.github.io/status/iconos/signo.png
+  - name: Dashboard SIGNO
+    slug: dashboard-signo
+    url: https://signo.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "<title>SIGNO</title>"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/signo.png
+  - name: API de integraciones
+    slug: api-integraciones
+    url: https://integrations.nueveonce.com/integrations/v1/health
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: '"status":"ok"'
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
+  - name: Portal de desarrolladores
+    slug: portal-desarrolladores
+    url: https://developers.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "NueveOnce Developers"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
+  - name: Telemedicina (web)
+    slug: telemedicina-web
+    url: https://telemedicine.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "NueveOnce Telemedicina"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
+  # The page title has an accent; the check uses an unaccented substring of it.
+  - name: Aquí Contigo (web)
+    slug: aqui-contigo-web
+    url: https://aquicontigo.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "Contigo</title>"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
+  - name: App web de pacientes
+    slug: app-pacientes-web
+    url: https://app.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "<title>Nueve once</title>"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
+  - name: Encuestas
+    slug: encuestas
+    url: https://encuestas.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    maxResponseTime: 3000
+    connectTimeout: 10
+    requestTimeout: 10
+    maxRetries: 2
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)"
+    __dangerous__body_down_if_text_missing: "<title>Encuesta NueveOnce</title>"
+    icon: https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png
 
+# No theme key: the site follows the visitor's light or dark preference.
 status-website:
-  # Add your custom domain name, or remove the `cname` line if you don't have a domain
-  # Uncomment the `baseUrl` line if you don't have a custom domain and add your repo name there
-  cname: demo.upptime.js.org
-  # baseUrl: /your-repo-name
-  logoUrl: https://raw.githubusercontent.com/upptime/upptime.js.org/master/static/img/icon.svg
-  name: Upptime
-  introTitle: "**Upptime** is the open-source uptime monitor and status page, powered entirely by GitHub."
-  introMessage: This is a sample status page which uses **real-time** data from our [GitHub repository](https://github.com/upptime/upptime). No server required — just GitHub Actions, Issues, and Pages. [**Get your own for free**](https://github.com/upptime/upptime)
+  baseUrl: /status
+  name: Estado de NueveOnce
+  introTitle: Estado de los servicios de NueveOnce
+  introMessage: Revisamos nuestras plataformas automáticamente cada pocos minutos. Aquí puedes consultar su disponibilidad, los incidentes y los mantenimientos programados.
+  logoUrl: https://grupo-nuevo-once.github.io/status/logo-nueveonce.svg
+  favicon: https://grupo-nuevo-once.github.io/status/favicon.png
+  faviconSvg: https://grupo-nuevo-once.github.io/status/favicon.svg
   navbar:
-    - title: Status
-      href: /
-    - title: GitHub
-      href: https://github.com/$OWNER/$REPO
+    - title: Estado
+      href: https://grupo-nuevo-once.github.io/status/
+    - title: Soporte
+      href: "https://www.nueveonce.com/contacto"
+  productionCacheTime: 300000
+  metaTags:
+    - name: description
+      content: "Estado de los servicios de NueveOnce: disponibilidad, incidentes y mantenimientos programados."
+    # Pilot only: remove the robots tag at launch.
+    - name: robots
+      content: noindex
+  links:
+    - rel: stylesheet
+      href: https://grupo-nuevo-once.github.io/status/estado-es.css
+  scripts:
+    - src: https://grupo-nuevo-once.github.io/status/estado-es.js
 
-# Upptime also supports notifications, assigning issues, and more
-# See https://upptime.js.org/docs/configuration
+# Every key read by @upptime/status-page 1.17.0 (its i18n.yml) and by the README
+# summary of uptime-monitor 1.46.5 (src/summary.ts). Upptime fills in the
+# placeholders such as $DATE. The comment author placeholder is left out on
+# purpose so no login appears on the page, and liveStatusHtmlComment is not set
+# because it is a README marker.
+i18n:
+  activeIncidents: Incidentes activos
+  allSystemsOperational: Todos los servicios funcionan con normalidad
+  incidentReport: "Ver detalle (#$NUMBER) →"
+  activeIncidentSummary: "Abierto el $DATE · actualizaciones: $POSTS"
+  incidentTitle: "Detalle del evento #$NUMBER"
+  incidentDetails: Detalle del evento
+  incidentFixed: Resuelto
+  incidentOngoing: En curso
+  incidentOpenedAt: Inicio
+  incidentClosedAt: Fin
+  incidentViewOnGitHub: Ver en GitHub
+  incidentCommentSummary: "Publicado el $DATE"
+  incidentBack: "← Volver al inicio"
+  pastIncidents: Incidentes anteriores
+  pastIncidentsResolved: "Resuelto en $MINUTES min · actualizaciones: $POSTS"
+  liveStatus: Estado actual
+  overallUptime: "Disponibilidad: $UPTIME"
+  overallUptimeTitle: Disponibilidad
+  averageResponseTime: "Tiempo de respuesta promedio: $TIME ms"
+  averageResponseTimeTitle: Tiempo de respuesta promedio
+  sevelDayResponseTime: Tiempo de respuesta (7 días)
+  responseTimeMs: Tiempo de respuesta (ms)
+  up: 🟩 Operativo
+  down: 🟥 Con incidencias
+  degraded: 🟨 Rendimiento degradado
+  ms: " ms"
+  loading: Cargando…
+  navGitHub: GitHub
+  footer: "Página de estado de NueveOnce. [Código abierto]($REPO), basado en [Upptime](https://upptime.js.org)."
+  rateLimitExceededTitle: Demasiadas consultas
+  rateLimitExceededIntro: Desde tu conexión se hicieron demasiadas consultas en poco tiempo, así que por ahora no podemos mostrar el estado de los servicios.
+  rateLimitExceededWhatDoesErrorMean: "¿Qué significa?"
+  rateLimitExceededErrorMeaning: Para mostrar el estado de los servicios, esta página consulta un servicio externo que limita la cantidad de consultas por hora desde una misma conexión.
+  rateLimitExceededErrorHowCanFix: "¿Qué puedo hacer?"
+  rateLimitExceededErrorFix: "Espera un rato y vuelve a cargar la página: el límite se restablece en menos de una hora. Si necesitas ayuda, contacta a nuestro equipo de soporte."
+  rateLimitExceededGeneratePAT: Más información
+  rateLimitExceededHasSet: Tienes un token personal configurado.
+  rateLimitExceededRemoveToken: Eliminar token
+  rateLimitExceededGitHubPAT: Token personal de GitHub
+  rateLimitExceededCopyPastePAT: Pega tu token
+  rateLimitExceededSaveToken: Guardar token
+  errorTitle: Ocurrió un error
+  errorIntro: No pudimos obtener el estado más reciente de los servicios.
+  errorText: Intenta de nuevo en unos minutos.
+  errorHome: Ir al inicio
+  pastScheduledMaintenance: Mantenimientos anteriores
+  scheduledMaintenance: Mantenimiento programado
+  scheduledMaintenanceSummaryStarted: "Comenzó el $DATE · duración: $DURATION min"
+  scheduledMaintenanceSummaryStarts: "Comienza el $DATE · duración: $DURATION min"
+  startedAt: Comenzó
+  startsAt: Comienza
+  duration: Duración
+  durationMin: "$DURATION min"
+  incidentCompleted: Completado
+  incidentScheduled: Programado
+  duration24H: 24 h
+  duration7D: 7 días
+  duration30D: 30 días
+  duration1Y: 1 año
+  durationAll: Todo
+  locale: es-419
+  url: URL
+  status: Estado
+  history: Historial
+  responseTime: Tiempo de respuesta
+  responseTimeGraphAlt: Gráfico del tiempo de respuesta
+  responseTimeDay: Tiempo de respuesta en 24 horas
+  responseTimeWeek: Tiempo de respuesta en 7 días
+  responseTimeMonth: Tiempo de respuesta en 30 días
+  responseTimeYear: Tiempo de respuesta en 1 año
+  uptime: Disponibilidad
+  uptimeDay: Disponibilidad en 24 horas
+  uptimeWeek: Disponibilidad en 7 días
+  uptimeMonth: Disponibilidad en 30 días
+  uptimeYear: Disponibilidad en 1 año
+  degradedPerformance: 🟨 Rendimiento degradado
+  completeOutage: 🟥 Interrupción total
+  partialOutage: 🟧 Interrupción parcial

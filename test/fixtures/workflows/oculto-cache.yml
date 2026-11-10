@@ -1,0 +1,27 @@
+# Negative fixture for the "codigo-oculto" rule: the job that holds the App key restores a cache,
+# which the npm code of a key-less job in an earlier run may have written.
+name: Cache con llave
+on: workflow_dispatch
+permissions: {}
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/graficas
+          key: graficas
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: upptime/uptime-monitor@74f0683383384927e064d76a5f21f340d6af36fc # v1.46.5
+        with:
+          command: "update"
+        env:
+          GH_PAT: ${{ steps.app_token.outputs.token }}

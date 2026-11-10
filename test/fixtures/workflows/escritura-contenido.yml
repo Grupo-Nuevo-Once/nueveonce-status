@@ -1,0 +1,14 @@
+# Negative fixture for the "escritura-github" rule: GITHUB_TOKEN gets write access to the contents,
+# which only the App may have.
+name: Escritura en el contenido
+on: workflow_dispatch
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false

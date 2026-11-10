@@ -1,8 +1,5 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: Feature requests and ideas
-    url: https://github.com/orgs/upptime/discussions/new?category=ideas
-    about: Suggest an idea for this project
-  - name: Questions
-    url: https://github.com/orgs/upptime/discussions/new?category=q-a
-    about: Please ask and answer questions here
+  - name: Soporte de NueveOnce
+    url: https://www.nueveonce.com/contacto
+    about: Si tienes un problema con alguno de nuestros servicios, contacta a nuestro equipo de soporte. Este repositorio no recibe reportes.

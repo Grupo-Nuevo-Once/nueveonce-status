@@ -1,0 +1,56 @@
+# Keeps every issue and pull request locked (.github/scripts/candado.js). The status page renders
+# the comments of any issue or pull request number as raw HTML, so an unlocked conversation would
+# let anyone with a GitHub account publish script on the page.
+#
+# - Locks each issue and each pull request as soon as it is opened.
+# - A pull_request run from a fork gets a read-only GITHUB_TOKEN and cannot lock anything, so it
+#   is skipped, and a sweep every 15 minutes locks every unlocked issue and pull request, open or
+#   closed, whatever opened it.
+# - pull_request_target is not used on purpose. It runs with a write token (and secrets) in the
+#   context of this repository for pull requests from any fork, which is the classic way to hand
+#   a fork's code a write token, and the sweep already covers forks without it.
+# - Pull request runs take the workflow from the pull request itself, so the lock script is
+#   checked out from master rather than from the pull request.
+
+name: Candado
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: candado-${{ github.event.issue.number || github.event.pull_request.number || 'barrido' }}
+  cancel-in-progress: false
+jobs:
+  bloquear:
+    name: Bloquear
+    if: >-
+      github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The one documented exception to the App being the only identity with write access: a job
+    # that holds no App key and runs no npm code may give GITHUB_TOKEN, its only token, write
+    # access to issues and pull requests, and nothing else.
+    permissions:
+      # Only for the checkout of the script; the repository is public anyway.
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Lock
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          retries: 3
+          script: |
+            const { run } = require('./.github/scripts/candado.js');
+            await run({ github, context, core });

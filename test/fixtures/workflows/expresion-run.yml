@@ -1,0 +1,13 @@
+# Negative fixture for the "expresiones" rule: an issue title interpolated into a shell script.
+name: Expresion en run
+on:
+  issues:
+    types: [opened]
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Saludar
+        run: echo "Issue ${{ github.event.issue.title }}"

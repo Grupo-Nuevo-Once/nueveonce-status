@@ -1,0 +1,14 @@
+# Negative fixture for the "token-github" and "escritura-github" rules: GITHUB_TOKEN named in a job
+# that gives it write access to the contents, which only the App may have.
+name: Token con escritura
+on: workflow_dispatch
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          token: ${{ github.token }}

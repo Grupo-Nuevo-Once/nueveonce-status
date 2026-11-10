@@ -1,0 +1,21 @@
+# Negative fixture for the "codigo-oculto" rule: a local action, whose action.yml the change itself
+# brings, runs in the job that holds the App key and may run npm inside.
+name: Accion local con llave
+on: workflow_dispatch
+permissions: {}
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: ./.github/actions/publicar
+        env:
+          GH_PAT: ${{ steps.app_token.outputs.token }}

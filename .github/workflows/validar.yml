@@ -1,0 +1,88 @@
+# Runs scripts/validar.sh: the unit tests; every rule of .github/scripts/validar.js (its REGLAS
+# list names them all), on .upptimerc.yml and componentes.json (component slugs and names, [200],
+# maxRedirects 0, body checks, host allowlist, link targets on allowed hosts as written, no "$"
+# in site fields, no markup in the page's texts) and on the workflows (SHA pins,
+# "permissions: {}" at the root, forbidden triggers, no expressions inside code, no secret but
+# the App key and GITHUB_TOKEN, the key only in "estado" jobs, and in those no npm code, no
+# container, service, local action or cache, only the run's own artifact, and the App token as
+# the one token; GITHUB_TOKEN named only where it is a job's one token, and writing only issues
+# and pull requests, in key-less jobs without npm); the negative fixtures that prove each rule
+# fires; and actionlint.
+#
+# Two jobs, on separate runners:
+# - "validar" runs the change's own copy of everything, including its unit tests, so the checker
+#   the change would leave on master still proves all of its rules.
+# - "validar-master" (pull requests only) runs master's copy of the checker against the change,
+#   so that a change cannot quietly weaken the rules that judge it. That job executes no code from
+#   the change, only reads its files: anything the change ran there could rewrite master's checker
+#   on disk first. Changing a rule or the allowlist therefore takes its own pull request, merged
+#   before the change that needs it. The bootstrap pull request has no master copy yet.
+# Both jobs are meant to be required status checks on master.
+#
+# Nothing here holds a write token or a secret: the change's code runs with contents: read.
+
+name: Validar
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+permissions: {}
+concurrency:
+  group: validar-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  validar:
+    name: validar
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the change
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          path: cambio
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate with the change's own checker
+        env:
+          HERRAMIENTAS_DIR: ${{ runner.temp }}/herramientas
+        run: bash cambio/scripts/validar.sh cambio
+  validar-master:
+    name: validar-master
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          ref: master
+          path: base
+          persist-credentials: false
+      - name: Checkout the change
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          path: cambio
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Validate with master's checker
+        env:
+          HERRAMIENTAS_DIR: ${{ runner.temp }}/herramientas
+        run: |
+          if [ -f base/scripts/validar.sh ]; then
+            bash base/scripts/validar.sh --sin-pruebas cambio
+          else
+            echo "::notice::master todavía no tiene scripts/validar.sh; solo corrió la copia de este cambio."
+          fi

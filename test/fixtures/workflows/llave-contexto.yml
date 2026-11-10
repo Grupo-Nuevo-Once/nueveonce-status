@@ -1,0 +1,15 @@
+# Negative fixture for the "llave" and "secretos" rules: toJSON(secrets) reads every secret the job
+# can reach, the App key included wherever it is defined.
+name: Llave por contexto
+on: workflow_dispatch
+permissions: {}
+jobs:
+  volcar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Contar
+        env:
+          TODOS: ${{ toJSON(secrets) }}
+        run: printf '%s' "$TODOS" | wc -c

@@ -1,0 +1,110 @@
+/*
+ * Styles added to the NueveOnce status page through the "links" key of
+ * .upptimerc.yml. They load after the theme and global stylesheets, so a rule
+ * here wins over an Upptime rule of the same specificity.
+ */
+
+:root {
+  --status-focus: #0b57d0;
+  --status-banner-bg: #fff3cd;
+  --status-banner-text: #4a3600;
+  --status-banner-border: #b07d00;
+}
+
+/* Same media query as the dark theme that Upptime loads. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --status-focus: #8ab4f8;
+    --status-banner-bg: #3a2d00;
+    --status-banner-text: #ffe08a;
+    --status-banner-border: #c99a00;
+  }
+}
+
+/* Freshness banner inserted by estado-es.js (contrast above 10:1 in both themes). */
+#aviso-vigencia {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--status-banner-border);
+  background: var(--status-banner-bg);
+  color: var(--status-banner-text);
+  font-weight: bold;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+/* Collapsed but still rendered, so the live region announces later changes. */
+#aviso-vigencia:empty {
+  padding: 0;
+  border: 0;
+}
+
+/* State as text, not only colour, after each live-status heading. The second
+   declaration gives screen readers a comma instead of the middle dot; browsers
+   without alternative-text support keep the first one. */
+.live-status article h4::after {
+  font-weight: normal;
+}
+
+.live-status article.up h4::after {
+  content: " · Operativo";
+  content: " · Operativo" / ", Operativo";
+}
+
+.live-status article.degraded h4::after {
+  content: " · Rendimiento degradado";
+  content: " · Rendimiento degradado" / ", Rendimiento degradado";
+}
+
+.live-status article.down h4::after {
+  content: " · No disponible";
+  content: " · No disponible" / ", No disponible";
+}
+
+/* Visible keyboard focus in both themes. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--status-focus);
+  outline-offset: 2px;
+}
+
+/* The navbar scrolls horizontally and would clip an outline drawn outside. */
+nav a:focus-visible {
+  outline-offset: -4px;
+}
+
+/* The period selector hides its radios with display:none, which also takes
+   them out of the keyboard order. Keep them reachable but visually hidden,
+   and show the focus on their label. */
+form.r input[type="radio"] {
+  display: inline-block !important;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+form.r input[type="radio"]:focus-visible + label {
+  outline: 3px solid var(--status-focus);
+  outline-offset: 2px;
+}
+
+/* Rate-limit page: hide the personal access token form and the link to the
+   GitHub token instructions. Two rules, so a browser without :has() still
+   hides the link. */
+a[href*="personal-access-token"] {
+  display: none !important;
+}
+
+form:has(.submit-button) {
+  display: none !important;
+}

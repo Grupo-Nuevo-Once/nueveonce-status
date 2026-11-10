@@ -1,0 +1,25 @@
+# Negative fixture for the "npm-con-llave" rule: the root's env makes every node process load a
+# module from node_modules, uptime-monitor's included, in the job that holds the App key.
+name: npm en el env de la raiz
+on: workflow_dispatch
+permissions: {}
+env:
+  NODE_OPTIONS: "--require ./node_modules/x/index.js"
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: upptime/uptime-monitor@74f0683383384927e064d76a5f21f340d6af36fc # v1.46.5
+        with:
+          command: "update"
+        env:
+          GH_PAT: ${{ steps.app_token.outputs.token }}

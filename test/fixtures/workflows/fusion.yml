@@ -1,0 +1,16 @@
+# Negative fixture for the "fusion" rule in a workflow: js-yaml 5.4.3 leaves the merge key "<<" as
+# a plain key, so the checker would read "dos" differently from GitHub.
+name: Fusion
+on: workflow_dispatch
+permissions: {}
+jobs:
+  uno: &base
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+  dos:
+    <<: *base
