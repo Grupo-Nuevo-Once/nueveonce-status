@@ -45,12 +45,17 @@ const PROPIETARIO = 'Grupo-Nuevo-Once';
 const REPOSITORIO = 'nueveonce-status';
 const BASE_URL = '/nueveonce-status';
 const HOST_PAGINA = 'grupo-nuevo-once.github.io';
+// The page's own domain. With "cname" set to it, and no baseUrl, GitHub Pages serves the site from
+// the domain's root and github.io redirects there. Any other value would hand the page, and that
+// redirect, to whoever controls the domain.
+const DOMINIO_PAGINA = 'status.nueveonce.com';
 // The company's public contact page, the page's "Soporte" link. The only company host besides the
-// components: allowed in page links and as a mention, never as a monitored site.
+// components and the page's domain: allowed in page links and as a mention, never as a monitored
+// site.
 const HOST_SOPORTE = 'www.nueveonce.com';
 const RUTA_PAGINA = `${BASE_URL}/`;
 // Hosts a site may point at, in its URL or in any other field. Compared exactly.
-const HOSTS_SITIOS = Object.freeze([...HOSTS_COMPONENTES, HOST_PAGINA]);
+const HOSTS_SITIOS = Object.freeze([...HOSTS_COMPONENTES, HOST_PAGINA, DOMINIO_PAGINA]);
 // Hosts allowed in the rest of the configuration: page links, logo, footer.
 const HOSTS_CONFIG = Object.freeze([
   ...HOSTS_SITIOS,
@@ -66,8 +71,9 @@ const MARCADORES = Object.freeze(['__SUPPORT_URL__']);
 
 // Keys the configuration may use. uptime-monitor and the page act on many more, and some of them
 // hand control to whoever writes the file: raw HTML or script in the page (customHeadHtml,
-// customBodyHtml, js, css), another npm package as the site (customStatusWebsitePackage), a
-// custom domain (cname), insecure TLS (__dangerous__insecure), extra issue labels (tags).
+// customBodyHtml, js, css), another npm package as the site (customStatusWebsitePackage), insecure
+// TLS (__dangerous__insecure), extra issue labels (tags). "cname" is allowed with one value only,
+// DOMINIO_PAGINA (validarRepositorio).
 const CLAVES_RAIZ = Object.freeze([
   'owner',
   'repo',
@@ -100,6 +106,7 @@ const CLAVES_SITIO = Object.freeze([
 ]);
 const CLAVES_PAGINA = Object.freeze([
   'baseUrl',
+  'cname',
   'name',
   'introTitle',
   'introMessage',
@@ -355,9 +362,17 @@ function validarUrlSitio(url, donde, reportar) {
   }
 }
 
+// Where GitHub Pages serves the site: the page's domain when the configuration sets cname (which
+// validarRepositorio only accepts as DOMINIO_PAGINA), this repository's path on github.io otherwise.
+function origenPagina(config) {
+  const pagina = esObjeto(config) ? config['status-website'] : undefined;
+  if (esObjeto(pagina) && pagina.cname !== undefined) return { host: DOMINIO_PAGINA, ruta: '/' };
+  return { host: HOST_PAGINA, ruta: RUTA_PAGINA };
+}
+
 // A value that must be a whole https URL (icon, logo, favicon, link targets). Scripts and
-// stylesheets run in the page, so they may only come from this repository's own site.
-function validarUrlCompleta(valor, ruta, permitidos, reportar) {
+// stylesheets run in the page, so they may only come from where the page itself is served.
+function validarUrlCompleta(valor, ruta, permitidos, reportar, origen = origenPagina(null)) {
   const donde = rutaComoTexto(ruta);
   if (MARCADORES.includes(valor)) return;
   const parsed = parsearUrl(valor);
@@ -370,8 +385,8 @@ function validarUrlCompleta(valor, ruta, permitidos, reportar) {
     return;
   }
   const carga = ruta[0] === 'status-website' && (ruta[1] === 'scripts' || ruta[1] === 'links');
-  if (carga && (parsed.hostname !== HOST_PAGINA || !parsed.pathname.startsWith(RUTA_PAGINA))) {
-    reportar('host', `${donde}: los scripts y hojas de estilo solo pueden venir de https://${HOST_PAGINA}${RUTA_PAGINA}.`);
+  if (carga && (parsed.hostname !== origen.host || !parsed.pathname.startsWith(origen.ruta))) {
+    reportar('host', `${donde}: los scripts y hojas de estilo solo pueden venir de https://${origen.host}${origen.ruta}.`);
   }
 }
 
@@ -475,8 +490,18 @@ function validarRepositorio(config, reportar) {
   }
   const pagina = config['status-website'];
   const baseUrl = esObjeto(pagina) ? pagina.baseUrl : undefined;
-  if (baseUrl !== BASE_URL) {
-    reportar('repositorio', `status-website.baseUrl es ${mostrar(baseUrl)} y debe ser ${BASE_URL}, la ruta en la que GitHub Pages publica este repositorio.`);
+  const cname = esObjeto(pagina) ? pagina.cname : undefined;
+  if (cname === undefined) {
+    if (baseUrl !== BASE_URL) {
+      reportar('repositorio', `status-website.baseUrl es ${mostrar(baseUrl)} y debe ser ${BASE_URL}, la ruta en la que GitHub Pages publica este repositorio.`);
+    }
+    return;
+  }
+  if (cname !== DOMINIO_PAGINA) {
+    reportar('repositorio', `status-website.cname es ${mostrar(cname)} y solo puede ser ${DOMINIO_PAGINA}: con otro dominio, GitHub Pages llevaría la página a quien lo controle.`);
+  }
+  if (baseUrl !== undefined) {
+    reportar('repositorio', `status-website.baseUrl es ${mostrar(baseUrl)} y no va junto a cname: GitHub Pages sirve el dominio desde la raíz.`);
   }
 }
 
@@ -559,13 +584,14 @@ function validarConfig(config, componentes, reportar) {
 
   // Everything outside "sites" ends up on the page too. Only "status-website" has URL-valued
   // keys; elsewhere ("i18n" included, which has a "url" label) values are display text.
+  const origen = origenPagina(config);
   for (const [clave, valor] of Object.entries(config)) {
     if (clave === 'sites') continue;
     for (const hoja of hojas(valor, [clave])) {
       validarMarcado(hoja, reportar);
       if (hoja.esClave) continue;
       if (clave === 'status-website' && esClaveUrl(hoja.ruta)) {
-        validarUrlCompleta(hoja.texto, hoja.ruta, HOSTS_CONFIG, reportar);
+        validarUrlCompleta(hoja.texto, hoja.ruta, HOSTS_CONFIG, reportar, origen);
       } else {
         validarUrlsEnTexto(hoja, HOSTS_CONFIG, reportar);
       }
@@ -579,7 +605,7 @@ function validarMenciones(texto, reportar) {
   const vistas = new Set();
   for (const mencion of String(texto).match(MENCION_DOMINIO) || []) {
     const host = mencion.toLowerCase();
-    if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || vistas.has(host)) continue;
+    if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || host === DOMINIO_PAGINA || vistas.has(host)) continue;
     vistas.add(host);
     reportar('host', `${mostrar(mencion)} no es uno de los componentes públicos; no escribas otros nombres del dominio.`);
   }
@@ -1263,6 +1289,7 @@ if (require.main === module) process.exitCode = main(process.argv.slice(2));
 module.exports = {
   HOSTS_COMPONENTES,
   HOST_PAGINA,
+  DOMINIO_PAGINA,
   HOSTS_SITIOS,
   HOSTS_CONFIG,
   CLAVES_RAIZ,
