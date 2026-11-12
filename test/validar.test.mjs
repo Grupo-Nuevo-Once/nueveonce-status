@@ -36,11 +36,11 @@ const URLS = {
 function base() {
   return {
     owner: 'Grupo-Nuevo-Once',
-    repo: 'status',
+    repo: 'nueveonce-status',
     assignees: [],
     commitMessages: {
-      commitAuthorName: 'nueveonce-estado[bot]',
-      commitAuthorEmail: '__BOT_USER_ID__+nueveonce-estado[bot]@users.noreply.github.com',
+      commitAuthorName: 'nueveonce-status[bot]',
+      commitAuthorEmail: '__BOT_USER_ID__+nueveonce-status[bot]@users.noreply.github.com',
     },
     sites: COMPONENTES.map(({ slug, nombre }) => ({
       name: nombre,
@@ -48,20 +48,20 @@ function base() {
       url: URLS[slug],
       expectedStatusCodes: [200],
       maxRedirects: 0,
-      headers: ['User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/status/)'],
+      headers: ['User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)'],
       __dangerous__body_down_if_text_missing: 'ok',
-      icon: 'https://grupo-nuevo-once.github.io/status/iconos/nueveonce.png',
+      icon: 'https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png',
     })),
     'status-website': {
-      baseUrl: '/status',
-      logoUrl: 'https://grupo-nuevo-once.github.io/status/logo-nueveonce.svg',
+      baseUrl: '/nueveonce-status',
+      logoUrl: 'https://grupo-nuevo-once.github.io/nueveonce-status/logo-nueveonce.svg',
       navbar: [
-        { title: 'Estado', href: 'https://grupo-nuevo-once.github.io/status/' },
+        { title: 'Estado', href: 'https://grupo-nuevo-once.github.io/nueveonce-status/' },
         { title: 'Soporte', href: '__SUPPORT_URL__' },
-        { title: 'Código', href: 'https://github.com/Grupo-Nuevo-Once/status' },
+        { title: 'Código', href: 'https://github.com/Grupo-Nuevo-Once/nueveonce-status' },
       ],
-      links: [{ rel: 'stylesheet', href: 'https://grupo-nuevo-once.github.io/status/estado-es.css' }],
-      scripts: [{ src: 'https://grupo-nuevo-once.github.io/status/estado-es.js' }],
+      links: [{ rel: 'stylesheet', href: 'https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.css' }],
+      scripts: [{ src: 'https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.js' }],
     },
     i18n: { url: 'URL', locale: 'es-419', footer: 'Basado en [Upptime](https://upptime.js.org) y [GitHub]($REPO).' },
   };
@@ -121,7 +121,7 @@ test('"$" is refused in every site field, keys included', () => {
 
 test('other site fields: icons and URLs inside text stay on allowlisted hosts', () => {
   assert.deepEqual(reglas(conSitio((s) => (s.icon = 'https://example.com/i.png'))), ['host']);
-  assert.deepEqual(reglas(conSitio((s) => (s.icon = 'http://grupo-nuevo-once.github.io/status/i.png'))), ['url']);
+  assert.deepEqual(reglas(conSitio((s) => (s.icon = 'http://grupo-nuevo-once.github.io/nueveonce-status/i.png'))), ['url']);
   assert.deepEqual(reglas(conSitio((s) => s.headers.push('Referer: https://example.com/'))), ['host']);
   // Hosts that GitHub owns are fine on the page, but not in a site.
   assert.deepEqual(reglas(conSitio((s) => s.headers.push('Referer: https://github.com/'))), ['host']);
@@ -235,7 +235,7 @@ test('texts outside the sites: no "<" or ">", and links only to https URLs or $R
   const permitidos = [
     (c) => (c.i18n.footer = 'Página de estado. [Código abierto]($REPO), basado en [Upptime](https://upptime.js.org).'),
     (c) => (c.i18n.incidentReport = 'Ver detalle (#$NUMBER) →'),
-    (c) => (c['status-website'].introMessage = 'Consulta [el estado](https://grupo-nuevo-once.github.io/status/) cuando quieras.'),
+    (c) => (c['status-website'].introMessage = 'Consulta [el estado](https://grupo-nuevo-once.github.io/nueveonce-status/) cuando quieras.'),
     (c) => (c.i18n.incidentBack = '← Volver al inicio'),
     (c) => (c.i18n.footer = 'Ver [la guía](https://upptime.js.org/docs/), [el código]($REPO).'),
   ];
@@ -264,16 +264,16 @@ test('commitMessages only names the App bot as the author', () => {
     (c) => (c.commitMessages.statusChange = '$PREFIX $SITE_NAME cambió a $STATUS'),
     (c) => (c.commitMessages.summaryJson = 'resumen'),
     (c) => delete c.commitMessages,
-    (c) => (c.commitMessages = 'nueveonce-estado[bot]'),
+    (c) => (c.commitMessages = 'nueveonce-status[bot]'),
     (c) => (c.commitMessages.commitAuthorName = 'Upptime Bot'),
     (c) => delete c.commitMessages.commitAuthorName,
     (c) => (c.commitMessages.commitAuthorEmail = 'nadie'),
-    (c) => (c.commitMessages.commitAuthorEmail = '+nueveonce-estado[bot]@users.noreply.github.com'),
-    (c) => (c.commitMessages.commitAuthorEmail = '0+nueveonce-estado[bot]@users.noreply.github.com'),
+    (c) => (c.commitMessages.commitAuthorEmail = '+nueveonce-status[bot]@users.noreply.github.com'),
+    (c) => (c.commitMessages.commitAuthorEmail = '0+nueveonce-status[bot]@users.noreply.github.com'),
   ];
   for (const cambio of casos) assert.deepEqual(reglas(con(cambio)), ['mensajes-commit'], String(cambio));
   // Once the bot's numeric user id replaces the placeholder.
-  assert.deepEqual(reglas(con((c) => (c.commitMessages.commitAuthorEmail = '123+nueveonce-estado[bot]@users.noreply.github.com'))), []);
+  assert.deepEqual(reglas(con((c) => (c.commitMessages.commitAuthorEmail = '123+nueveonce-status[bot]@users.noreply.github.com'))), []);
 });
 
 test('i18n.locale, when present, is a well-formed language tag', () => {

@@ -26,7 +26,7 @@
   var STALE_AFTER_MINUTES = 45;
 
   var RUNS_URL =
-    "https://api.github.com/repos/Grupo-Nuevo-Once/status/actions/workflows/uptime.yml/runs" +
+    "https://api.github.com/repos/Grupo-Nuevo-Once/nueveonce-status/actions/workflows/uptime.yml/runs" +
     "?branch=master&status=success&per_page=1";
   var CACHE_KEY = "estado-es-vigencia";
   var MINUTE_MS = 60 * 1000;

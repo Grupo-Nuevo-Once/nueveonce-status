@@ -2,7 +2,7 @@
 // scripts use. It enforces the one rule that shapes them: a comment on a locked issue fails, as
 // GitHub refuses it to GitHub Apps. `antes` hooks run before a method, to stage races.
 
-export const BOT = 'nueveonce-estado[bot]';
+export const BOT = 'nueveonce-status[bot]';
 
 function error(status, message) {
   return Object.assign(new Error(message), { status });
@@ -113,5 +113,5 @@ export function crearCoreFalso() {
 }
 
 export function crearContexto({ eventName, payload = {} }) {
-  return { eventName, payload, repo: { owner: 'Grupo-Nuevo-Once', repo: 'status' } };
+  return { eventName, payload, repo: { owner: 'Grupo-Nuevo-Once', repo: 'nueveonce-status' } };
 }

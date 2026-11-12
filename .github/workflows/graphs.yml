@@ -105,8 +105,8 @@ jobs:
       - name: Commit graphs
         env:
           ARTIFACT_DIR: ${{ steps.graphs.outputs.download-path }}
-          COMMIT_AUTHOR_NAME: "nueveonce-estado[bot]"
-          COMMIT_AUTHOR_EMAIL: "355641071+nueveonce-estado[bot]@users.noreply.github.com"
+          COMMIT_AUTHOR_NAME: "nueveonce-status[bot]"
+          COMMIT_AUTHOR_EMAIL: "355641071+nueveonce-status[bot]@users.noreply.github.com"
           LC_ALL: C
         run: |
           set -euo pipefail

@@ -18,7 +18,7 @@ function tituloUpptime(nombre, estado) {
 }
 
 function cuerpoUpptime({ nombre, url, estado, codigo, ms }) {
-  return `In [\`${SHA.substr(0, 7)}\`](https://github.com/Grupo-Nuevo-Once/status/commit/${SHA}), ${nombre} (${url}) ${
+  return `In [\`${SHA.substr(0, 7)}\`](https://github.com/Grupo-Nuevo-Once/nueveonce-status/commit/${SHA}), ${nombre} (${url}) ${
     estado === 'down' ? 'was **down**' : 'experienced **degraded performance**'
   }:
 - HTTP code: ${codigo}
@@ -29,7 +29,7 @@ function cuerpoUpptime({ nombre, url, estado, codigo, ms }) {
 function resueltoUpptime({ nombre, titulo, duracion }) {
   return `**Resolved:** ${nombre} ${
     titulo.includes('degraded') ? 'performance has improved' : 'is back up'
-  } in [\`${SHA.substr(0, 7)}\`](https://github.com/Grupo-Nuevo-Once/status/commit/${SHA}) after ${duracion}.`;
+  } in [\`${SHA.substr(0, 7)}\`](https://github.com/Grupo-Nuevo-Once/nueveonce-status/commit/${SHA}) after ${duracion}.`;
 }
 
 // getHumanReadableTimeDifference's format, with the runner's en-US toLocaleString().

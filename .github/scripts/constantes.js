@@ -16,7 +16,7 @@ const COMPONENTES = Object.freeze(
 const SLUGS = Object.freeze(COMPONENTES.map((componente) => componente.slug));
 
 // The GitHub App bot that runs Upptime and publishes manual incidents and maintenance.
-const BOT_LOGIN = 'nueveonce-estado[bot]';
+const BOT_LOGIN = 'nueveonce-status[bot]';
 
 // Accounts allowed to dispatch incidente.yml and mantenimiento.yml.
 const PUBLICADORES = Object.freeze(['fcastro-nueveonce']);
