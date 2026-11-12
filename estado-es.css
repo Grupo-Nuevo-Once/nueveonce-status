@@ -397,8 +397,9 @@ a {
   border: 0;
 }
 
-footer {
-  color: var(--nn-texto-suave);
+/* No footer: its text is empty in .upptimerc.yml, and this removes the space its element keeps. */
+#sapper > footer {
+  display: none;
 }
 
 @media (max-width: 720px) {
