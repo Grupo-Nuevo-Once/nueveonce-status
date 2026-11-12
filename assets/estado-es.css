@@ -1,27 +1,99 @@
 /*
  * Styles added to the NueveOnce status page through the "links" key of
  * .upptimerc.yml. They load after the theme and global stylesheets, so a rule
- * here wins over an Upptime rule of the same specificity.
+ * here wins over an Upptime rule of the same specificity; "#sapper" raises the
+ * specificity where an Upptime rule is scoped to its components.
+ *
+ * The page is always light, on white, with the NueveOnce colours: the variables
+ * below replace those of both Upptime themes, so a visitor whose system uses a
+ * dark scheme sees the same page.
  */
 
-:root {
-  --status-focus: #0b57d0;
+/* "html:root" outranks the ":root" of the themes, which the site inserts again after this
+   stylesheet while it loads. */
+html:root {
+  color-scheme: light;
+
+  /* NueveOnce brand. The cyan is decorative only: on white it is too light for text. */
+  --nn-azul: #004f9c;
+  --nn-cian: #14c4eb;
+
+  --nn-texto: #1f2328;
+  --nn-texto-suave: #59636e;
+  --nn-borde: #d0d7de;
+  --nn-fondo: #ffffff;
+
+  /* States. Text and icons reach 4.5:1 on white, bars 3:1. */
+  --nn-ok: #1a7f37;
+  --nn-degradado: #9a6700;
+  --nn-caido: #cf222e;
+  --nn-barra-ok: #3ba55c;
+  --nn-barra-menor: #b08800;
+  --nn-barra-parcial: #e16f24;
+  --nn-barra-mayor: #cf222e;
+  --nn-barra-sin-datos: #d8dee4;
+
+  --status-focus: var(--nn-azul);
   --status-banner-bg: #fff3cd;
   --status-banner-text: #4a3600;
   --status-banner-border: #b07d00;
+
+  /* Upptime's theme variables, the same for every colour scheme. */
+  --body-background-color: var(--nn-fondo);
+  --body-text-color: var(--nn-texto);
+  --card-background-color: var(--nn-fondo);
+  --card-border-color: var(--nn-borde);
+  --nav-background-color: var(--nn-fondo);
+  --nav-border-bottom-color: var(--nn-borde);
+  --nav-current-border-bottom-color: var(--nn-azul);
+  --up-border-left-color: var(--nn-ok);
+  --degraded-border-left-color: var(--nn-degradado);
+  --down-border-left-color: var(--nn-caido);
+  --down-background-color: #ffebe9;
+  --change-background-color: #fff3cd;
+  --tag-color: #ffffff;
+  --tag-up-background-color: var(--nn-ok);
+  --tag-degraded-background-color: var(--nn-degradado);
+  --tag-down-background-color: var(--nn-caido);
+  --error-button-border-color: var(--nn-azul);
+  --error-button-background-color: var(--nn-azul);
+  --error-button-color: #ffffff;
+  --submit-button-border-color: var(--nn-azul);
+  --submit-button-background-color: var(--nn-azul);
+  --submit-button-color: #ffffff;
+  --graph-opacity: 1;
+  --graph-filter: none;
+  --code-background-color: #f6f8fa;
+  --code-color: var(--nn-texto);
 }
 
-/* Same media query as the dark theme that Upptime loads. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --status-focus: #8ab4f8;
-    --status-banner-bg: #3a2d00;
-    --status-banner-text: #ffe08a;
-    --status-banner-border: #c99a00;
-  }
+html,
+html body {
+  background: var(--nn-fondo);
+  color: var(--nn-texto);
 }
 
-/* Freshness banner inserted by estado-es.js (contrast above 10:1 in both themes). */
+a {
+  color: var(--nn-azul);
+}
+
+/* Wider than Upptime's 800 px, for two columns of 90 bars. */
+.container {
+  max-width: 1040px;
+}
+
+/* Navigation: white, under a stripe in the brand colours. */
+#sapper > nav {
+  padding-top: 4px;
+  background: linear-gradient(90deg, var(--nn-azul), var(--nn-cian)) top left / 100% 4px no-repeat,
+    var(--nn-fondo);
+}
+
+#sapper > nav a {
+  color: var(--nn-texto);
+}
+
+/* Freshness banner inserted by estado-es.js (contrast above 10:1). */
 #aviso-vigencia {
   margin: 0;
   padding: 0.75rem 1rem;
@@ -40,9 +112,151 @@
   border: 0;
 }
 
-/* State as text, not only colour, after each live-status heading. The second
-   declaration gives screen readers a comma instead of the middle dot; browsers
-   without alternative-text support keep the first one. */
+/* Page title and introduction. */
+#sapper main > header {
+  margin: 2.5rem 0 1.75rem;
+}
+
+#sapper main > header h1 {
+  margin: 0 0 0.5rem;
+  color: var(--nn-azul);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+#sapper main > header .lead {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--nn-texto-suave);
+  font-size: 1.125rem;
+}
+
+/* Summary banner: one coloured bar for the whole platform, with an icon in
+   place of the emoji that estado-es.js removes. White text reaches 4.5:1 on
+   each background. */
+#sapper main > article {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin: 0 0 2.75rem;
+  padding: 1.125rem 1.5rem;
+  border: 0 !important;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(31, 35, 40, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  color: #ffffff !important;
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+#sapper main > article.up {
+  background: var(--nn-ok);
+}
+
+#sapper main > article.degraded {
+  background: var(--nn-degradado);
+}
+
+#sapper main > article.down {
+  background: var(--nn-caido);
+}
+
+#sapper main > article::before {
+  content: "";
+  flex: none;
+  width: 1.625rem;
+  height: 1.625rem;
+  background: no-repeat center / contain;
+}
+
+#sapper main > article.up::before,
+.nn-icono-up {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+}
+
+#sapper main > article.degraded::before,
+.nn-icono-degraded {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' d='M12 5.5v8'/%3E%3Ccircle cx='12' cy='18.5' r='1.75' fill='white'/%3E%3C/svg%3E");
+}
+
+#sapper main > article.down::before,
+.nn-icono-down {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E");
+}
+
+/* "Estado actual", with the period on the right. */
+#sapper main > .f {
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  margin: 0 0 1rem;
+}
+
+#sapper main > .f > h2 {
+  margin: 0;
+  color: var(--nn-texto);
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+/* With the bars there is one fixed period: the selector would change nothing. */
+#sapper main.nn-con-barras > .f > form.r {
+  display: none;
+}
+
+.nn-periodo {
+  margin: 0;
+  color: var(--nn-texto-suave);
+}
+
+/* Component cards: two columns separated by 1 px lines, one on a phone. */
+#sapper .live-status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 1px solid var(--nn-borde);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--nn-borde);
+}
+
+#sapper .live-status > article {
+  min-width: 0;
+  margin: 0;
+  padding: 1.5rem 1.5rem 1.25rem;
+  border: 0 !important;
+  border-radius: 0;
+  background: var(--nn-fondo) !important;
+  color: var(--nn-texto) !important;
+}
+
+#sapper .live-status > article:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+#sapper .live-status > article h4 {
+  margin: 0 2.75rem 0.875rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+#sapper .live-status > article h4 a {
+  color: var(--nn-texto);
+  text-decoration: none;
+}
+
+#sapper .live-status > article h4 a:hover {
+  color: var(--nn-azul);
+  text-decoration: underline;
+}
+
+/* State as text, not only colour, after each live-status heading, for cards
+   that keep Upptime's content. The second declaration gives screen readers a
+   comma instead of the middle dot; browsers without alternative-text support
+   keep the first one. */
 .live-status article h4::after {
   font-weight: normal;
 }
@@ -62,7 +276,207 @@
   content: " · No disponible" / ", No disponible";
 }
 
-/* Visible keyboard focus in both themes. */
+/* A card with the bars states its condition in its own line instead. */
+#sapper .live-status > article.nn-mejorada h4::after {
+  content: none;
+}
+
+#sapper .live-status > article.nn-mejorada h4 .icon,
+#sapper .live-status > article.nn-mejorada > :not(h4):not(.nn-extra) {
+  display: none;
+}
+
+.nn-icono {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  /* Longhands: a "background" shorthand here would drop the icon set above. */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 1.125rem;
+}
+
+.nn-icono-up {
+  background-color: var(--nn-ok);
+}
+
+.nn-icono-degraded {
+  background-color: var(--nn-degradado);
+}
+
+.nn-icono-down {
+  background-color: var(--nn-caido);
+}
+
+/* Above the link that covers the whole card, so each bar keeps its tooltip. */
+.nn-barras,
+.nn-leyenda {
+  position: relative;
+  z-index: 1;
+}
+
+.nn-barras {
+  display: flex;
+  gap: 2px;
+  height: 2.25rem;
+  margin: 0 0 0.625rem;
+}
+
+.nn-barra {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 1px;
+  background: var(--nn-barra-sin-datos);
+}
+
+.nn-barra:hover {
+  opacity: 0.6;
+}
+
+.nn-barra-ok {
+  background: var(--nn-barra-ok);
+}
+
+.nn-barra-menor {
+  background: var(--nn-barra-menor);
+}
+
+.nn-barra-parcial {
+  background: var(--nn-barra-parcial);
+}
+
+.nn-barra-mayor {
+  background: var(--nn-barra-mayor);
+}
+
+.nn-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--nn-texto-suave);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.nn-linea {
+  flex: 1 1 auto;
+  min-width: 0.5rem;
+  height: 1px;
+  background: var(--nn-borde);
+}
+
+.nn-estado {
+  margin: 0.625rem 0 0;
+  color: var(--nn-texto-suave);
+  font-size: 0.9375rem;
+}
+
+.live-status > article.degraded .nn-estado {
+  color: var(--nn-degradado);
+  font-weight: 600;
+}
+
+.live-status > article.down .nn-estado {
+  color: var(--nn-caido);
+  font-weight: 600;
+}
+
+.nn-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+footer {
+  color: var(--nn-texto-suave);
+}
+
+@media (max-width: 720px) {
+  #sapper .live-status {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #sapper .live-status > article:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* Room for the links: the title next to the logo hides from view but stays
+     the name of the logo link for screen readers. */
+  #sapper > nav {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  #sapper > nav ul a {
+    padding: 1.25rem 0.75rem;
+  }
+
+  #sapper > nav .logo {
+    margin-right: 1rem;
+  }
+
+  #sapper > nav .logo img {
+    height: 2.5rem;
+    margin-right: 0;
+  }
+
+  #sapper > nav .logo > div {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  #sapper main > header h1 {
+    font-size: 1.75rem;
+  }
+
+  #sapper main > article {
+    padding: 1rem;
+    font-size: 1.125rem;
+  }
+
+  #sapper .live-status > article {
+    padding: 1.25rem 1rem 1rem;
+  }
+
+  .nn-icono {
+    right: 1rem;
+  }
+
+  .nn-barras {
+    gap: 1px;
+  }
+
+  .nn-leyenda {
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Visible keyboard focus. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
