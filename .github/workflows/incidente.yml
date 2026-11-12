@@ -1,0 +1,120 @@
+# Declares, updates and resolves incidents by hand, publishing as the App bot
+# (.github/scripts/incidente.js).
+#
+# - Only the accounts in the allowlist may publish: the "autorizar" job fails for anyone else,
+#   and the job that holds the App key does not even start. Anything else with Actions write
+#   access could otherwise dispatch this workflow and publish text on the page. The allowlist
+#   lives here and in .github/scripts/constantes.js; test/flujos.test.mjs keeps them equal.
+# - Inputs reach the script only through environment variables, never interpolated into code.
+# - The message is sanitized before it is published: the page renders comments as raw HTML.
+# - Dispatch inputs are visible in the public Actions log of the run. If one ever leaks something,
+#   delete the run (gh run delete) and the comment; editing is not enough, because the edit
+#   history of a comment is public too.
+
+name: Incidente
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: "Qué hacer: declarar un incidente nuevo, o actualizar o resolver uno existente"
+        type: choice
+        required: true
+        options:
+          - declarar
+          - actualizar
+          - resolver
+      numero:
+        description: "Número del issue (solo para actualizar o resolver)"
+        type: string
+        required: false
+      componente:
+        description: "Componente afectado (solo para declarar)"
+        type: choice
+        required: true
+        options:
+          - api-signo
+          - dashboard-signo
+          - api-integraciones
+          - portal-desarrolladores
+          - telemedicina-web
+          - aqui-contigo-web
+          - app-pacientes-web
+          - encuestas
+      estado:
+        description: "Estado que se publica (para resolver, Resuelto)"
+        type: choice
+        required: true
+        options:
+          - Investigando
+          - Identificado
+          - Monitoreando
+          - Resuelto
+      mensaje:
+        description: "Texto para los clientes. Se publica sin HTML y solo con enlaces https"
+        type: string
+        required: true
+permissions: {}
+concurrency:
+  group: incidente
+  cancel-in-progress: false
+jobs:
+  autorizar:
+    name: Autorizar
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Refuse anyone outside the allowlist
+        env:
+          ACTOR: ${{ github.actor }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+        run: |
+          for cuenta in "$ACTOR" "$TRIGGERING_ACTOR"; do
+            if [ "$cuenta" != "fcastro-nueveonce" ]; then
+              echo "::error::La cuenta $cuenta no está autorizada para publicar en la página de estado."
+              exit 1
+            fi
+          done
+          echo "Cuenta autorizada."
+  publicar:
+    name: Publicar
+    needs: autorizar
+    if: github.actor == 'fcastro-nueveonce' && github.triggering_actor == 'fcastro-nueveonce'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # A plain environment reference, so GitHub creates a deployment and the environment's
+    # master-only branch policy certainly applies. GitHub documents that wait timers and required
+    # reviewers still apply with "deployment: false", but says nothing about branch policies.
+    environment: estado
+    # The App token is this job's only token, passed to every step that takes one, so
+    # GITHUB_TOKEN gets no permissions.
+    permissions: {}
+    steps:
+      # Minted first, scoped to this repository: read access to its contents for the checkout of
+      # the scripts, write access to issues for the script.
+      - name: Create GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          persist-credentials: false
+      - name: Publish
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          ACCION: ${{ inputs.accion }}
+          NUMERO: ${{ inputs.numero }}
+          COMPONENTE: ${{ inputs.componente }}
+          ESTADO: ${{ inputs.estado }}
+          MENSAJE: ${{ inputs.mensaje }}
+        with:
+          github-token: ${{ steps.app_token.outputs.token }}
+          script: |
+            const { run } = require('./.github/scripts/incidente.js');
+            await run({ github, context, core });

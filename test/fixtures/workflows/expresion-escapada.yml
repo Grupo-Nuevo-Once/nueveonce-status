@@ -1,0 +1,14 @@
+# Negative fixture for the "expresiones" rule: "\x24" is "$" once YAML reads the string, so GitHub
+# still interpolates the title. Only the parsed document shows it; the text does not.
+name: Expresion escapada
+on:
+  issues:
+    types: [opened]
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Saludar
+        run: "echo \x24{{ github.event.issue.title }}"

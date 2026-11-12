@@ -1,0 +1,105 @@
+# Schedules a maintenance window, publishing as the App bot (.github/scripts/mantenimiento.js).
+#
+# - Upptime suppresses incidents only for the listed components and only between start and end,
+#   then closes and locks the issue on its first run after end. If the work runs over, extend
+#   the window or declare an incident with incidente.yml.
+# - Dates are UTC, written as 2026-11-21T04:00:00Z, and every component must exist in
+#   .upptimerc.yml. Empty lists are left out of the issue entirely: a bare "expectedDown:" line
+#   makes every Uptime CI run fail and sends every visitor of the page to its error page.
+# - Same guards as incidente.yml: an allowlist of accounts checked before the job that holds the
+#   App key starts, and inputs passed only through environment variables.
+
+name: Mantenimiento
+on:
+  workflow_dispatch:
+    inputs:
+      titulo:
+        description: "Título visible, por ejemplo: Actualización de la base de datos"
+        type: string
+        required: true
+      inicio:
+        description: "Inicio en UTC, por ejemplo 2026-11-21T04:00:00Z"
+        type: string
+        required: true
+      fin:
+        description: "Fin en UTC, por ejemplo 2026-11-21T05:00:00Z"
+        type: string
+        required: true
+      caidos:
+        description: "Componentes que estarán fuera de servicio, separados por comas (por ejemplo api-signo, dashboard-signo)"
+        type: string
+        required: false
+      degradados:
+        description: "Componentes que funcionarán con rendimiento degradado, separados por comas"
+        type: string
+        required: false
+      descripcion:
+        description: "Texto para los clientes. Se publica sin HTML y solo con enlaces https"
+        type: string
+        required: true
+permissions: {}
+concurrency:
+  group: mantenimiento
+  cancel-in-progress: false
+jobs:
+  autorizar:
+    name: Autorizar
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Refuse anyone outside the allowlist
+        env:
+          ACTOR: ${{ github.actor }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+        run: |
+          for cuenta in "$ACTOR" "$TRIGGERING_ACTOR"; do
+            if [ "$cuenta" != "fcastro-nueveonce" ]; then
+              echo "::error::La cuenta $cuenta no está autorizada para publicar en la página de estado."
+              exit 1
+            fi
+          done
+          echo "Cuenta autorizada."
+  publicar:
+    name: Publicar
+    needs: autorizar
+    if: github.actor == 'fcastro-nueveonce' && github.triggering_actor == 'fcastro-nueveonce'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # A plain environment reference, so GitHub creates a deployment and the environment's
+    # master-only branch policy certainly applies. GitHub documents that wait timers and required
+    # reviewers still apply with "deployment: false", but says nothing about branch policies.
+    environment: estado
+    # The App token is this job's only token, passed to every step that takes one, so
+    # GITHUB_TOKEN gets no permissions.
+    permissions: {}
+    steps:
+      # Minted first, scoped to this repository: read access to its contents for the checkout of
+      # the scripts, write access to issues for the script.
+      - name: Create GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: read
+          permission-issues: write
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          persist-credentials: false
+      - name: Publish
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          TITULO: ${{ inputs.titulo }}
+          INICIO: ${{ inputs.inicio }}
+          FIN: ${{ inputs.fin }}
+          CAIDOS: ${{ inputs.caidos }}
+          DEGRADADOS: ${{ inputs.degradados }}
+          DESCRIPCION: ${{ inputs.descripcion }}
+        with:
+          github-token: ${{ steps.app_token.outputs.token }}
+          script: |
+            const { run } = require('./.github/scripts/mantenimiento.js');
+            await run({ github, context, core });

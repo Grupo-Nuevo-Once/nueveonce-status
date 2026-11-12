@@ -1,0 +1,32 @@
+# Negative fixture for the "artefacto" rule: the key-less build job chooses, through its outputs,
+# which directory the job that holds the App key publishes.
+name: Salida de otro job
+on: workflow_dispatch
+permissions: {}
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      dir: ${{ steps.salida.outputs.dir }}
+    steps:
+      - id: salida
+        run: echo "dir=/tmp" >> "$GITHUB_OUTPUT"
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          github_token: ${{ steps.app_token.outputs.token }}
+          publish_dir: ${{ needs.construir.outputs.dir }}

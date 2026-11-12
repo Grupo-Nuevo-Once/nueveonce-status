@@ -1,0 +1,24 @@
+# Negative fixture for the "codigo-oculto" rule: a container image chosen by its tag wraps every
+# step of the job that holds the App key, git and the push included.
+name: Contenedor con llave
+on: workflow_dispatch
+permissions: {}
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    container: node:24
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: upptime/uptime-monitor@74f0683383384927e064d76a5f21f340d6af36fc # v1.46.5
+        with:
+          command: "update"
+        env:
+          GH_PAT: ${{ steps.app_token.outputs.token }}

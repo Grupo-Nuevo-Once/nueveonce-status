@@ -1,0 +1,15 @@
+# Negative fixture for the "pin" rule: a tag, a branch and a short SHA instead of a full commit SHA.
+name: Sin pin
+on: workflow_dispatch
+permissions: {}
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - uses: actions/setup-node@main
+      - uses: actions/github-script@ed59741
+        with:
+          script: core.info('ok')

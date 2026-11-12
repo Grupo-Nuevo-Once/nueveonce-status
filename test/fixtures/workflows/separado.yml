@@ -1,0 +1,55 @@
+# Positive fixture for the workflow rules: the split this repository's workflows use. "construir"
+# runs npm code without any environment, reading with a GITHUB_TOKEN limited to contents: read;
+# "publicar" holds the App key of the "estado" environment and runs only pinned actions.
+name: Separado
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions: {}
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          token: ${{ github.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "20"
+          package-manager-cache: false
+      - name: Generar
+        env:
+          GH_PAT: ${{ github.token }}
+        run: npx --yes @upptime/graphs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: salida
+          path: graphs/
+  publicar:
+    needs: construir
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: salida
+          path: ${{ runner.temp }}/salida
+      - id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+      - uses: upptime/uptime-monitor@74f0683383384927e064d76a5f21f340d6af36fc # v1.46.5
+        with:
+          command: "update"
+        env:
+          GH_PAT: ${{ steps.app_token.outputs.token }}
+          SECRETS_CONTEXT: '{}'

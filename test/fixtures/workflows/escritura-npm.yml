@@ -1,0 +1,14 @@
+# Negative fixture for the "escritura-github" rule: the documented exception, GITHUB_TOKEN writing
+# issues, in a job that runs npm code, where it does not apply.
+name: Escritura con npm
+on: workflow_dispatch
+permissions: {}
+jobs:
+  comentar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Comentar
+        run: npx --yes otro-paquete

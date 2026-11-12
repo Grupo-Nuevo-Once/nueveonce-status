@@ -1,0 +1,13 @@
+# Negative fixture for the "permisos" rule: the root grants every permission instead of none.
+name: Permisos
+on: workflow_dispatch
+permissions: write-all
+jobs:
+  ejemplo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
