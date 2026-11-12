@@ -1,0 +1,37 @@
+# Temporary test, never merged: checks that the "estado" environment's branch policy keeps the
+# App key away from every ref other than master, with and without "deployment: false".
+# Each job only reports whether the secret is non-empty; it never prints it.
+name: Prueba de entorno
+
+on:
+  push:
+    branches:
+      - prueba-entorno
+  pull_request:
+
+permissions: {}
+
+jobs:
+  sin-deployment:
+    name: Sin deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: estado
+      deployment: false
+    steps:
+      - name: Report whether the key is present
+        env:
+          LLAVE: ${{ secrets.GH_APP_PRIVATE_KEY }}
+        run: if [ -n "$LLAVE" ]; then echo "RESULTADO llave presente"; else echo "RESULTADO sin llave"; fi
+
+  con-deployment:
+    name: Con deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: estado
+    steps:
+      - name: Report whether the key is present
+        env:
+          LLAVE: ${{ secrets.GH_APP_PRIVATE_KEY }}
+        run: if [ -n "$LLAVE" ]; then echo "RESULTADO llave presente"; else echo "RESULTADO sin llave"; fi
