@@ -53,6 +53,11 @@ const DOMINIO_PAGINA = 'status.nueveonce.com';
 // components and the page's domain: allowed in page links and as a mention, never as a monitored
 // site.
 const HOST_SOPORTE = 'www.nueveonce.com';
+// The support mailbox, behind the page's "Avisos por correo" link. A mailto to it with exactly this
+// subject, as the href of a navbar entry, is the only link that is not https, and that whole link
+// is the only place the bare company domain may appear in the file.
+const CORREO_SOPORTE = 'soporte@nueveonce.com';
+const ENLACE_AVISOS = `mailto:${CORREO_SOPORTE}?subject=Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce`;
 const RUTA_PAGINA = `${BASE_URL}/`;
 // Hosts a site may point at, in its URL or in any other field. Compared exactly.
 const HOSTS_SITIOS = Object.freeze([...HOSTS_COMPONENTES, HOST_PAGINA, DOMINIO_PAGINA]);
@@ -346,6 +351,17 @@ function esClaveUrl(ruta) {
   return typeof ultima === 'string' && CLAVES_URL.includes(ultima);
 }
 
+// status-website.navbar[<n>].href, the only place the support mailto may go.
+function esEnlaceDelMenu(ruta) {
+  return (
+    ruta.length === 4 &&
+    ruta[0] === 'status-website' &&
+    ruta[1] === 'navbar' &&
+    typeof ruta[2] === 'number' &&
+    ruta[3] === 'href'
+  );
+}
+
 function validarUrlSitio(url, donde, reportar) {
   if (typeof url !== 'string') {
     reportar('url', `${donde}.url falta o no es texto.`);
@@ -375,6 +391,7 @@ function origenPagina(config) {
 function validarUrlCompleta(valor, ruta, permitidos, reportar, origen = origenPagina(null)) {
   const donde = rutaComoTexto(ruta);
   if (MARCADORES.includes(valor)) return;
+  if (valor === ENLACE_AVISOS && esEnlaceDelMenu(ruta)) return;
   const parsed = parsearUrl(valor);
   if (!parsed || parsed.protocol !== 'https:' || parsed.username || parsed.password || !/^https:\/\//i.test(valor)) {
     reportar('url', `${donde}: ${mostrar(valor)} no es una URL https completa.`);
@@ -600,10 +617,11 @@ function validarConfig(config, componentes, reportar) {
 }
 
 // Names under the company domain that are not public components, in the raw text so that YAML
-// comments count too.
+// comments count too. The support link is not such a name, so each exact copy of it goes first;
+// the address anywhere else still counts.
 function validarMenciones(texto, reportar) {
   const vistas = new Set();
-  for (const mencion of String(texto).match(MENCION_DOMINIO) || []) {
+  for (const mencion of String(texto).split(ENLACE_AVISOS).join(' ').match(MENCION_DOMINIO) || []) {
     const host = mencion.toLowerCase();
     if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || host === DOMINIO_PAGINA || vistas.has(host)) continue;
     vistas.add(host);
