@@ -2,7 +2,7 @@
 
 Este repositorio publica la página de estado de NueveOnce: la disponibilidad de nuestras plataformas, los incidentes y los mantenimientos programados. Las verificaciones se hacen automáticamente cada pocos minutos.
 
-**Página de estado:** [grupo-nuevo-once.github.io/status](https://grupo-nuevo-once.github.io/status/)
+**Página de estado:** [grupo-nuevo-once.github.io/nueveonce-status](https://grupo-nuevo-once.github.io/nueveonce-status/)
 
 **Estado actual:** <!--live status--> **Pendiente de la primera verificación**
 

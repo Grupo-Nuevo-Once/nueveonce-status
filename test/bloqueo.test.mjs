@@ -6,7 +6,7 @@ import { crearGithubFalso } from './github-falso.mjs';
 const require = createRequire(import.meta.url);
 const b = require('../.github/scripts/bloqueo.js');
 
-const REF = { owner: 'Grupo-Nuevo-Once', repo: 'status', issue_number: 3 };
+const REF = { owner: 'Grupo-Nuevo-Once', repo: 'nueveonce-status', issue_number: 3 };
 const conError = (status, message) => Object.assign(new Error(message), { status });
 
 test('lock errors are recognised by status and message', () => {

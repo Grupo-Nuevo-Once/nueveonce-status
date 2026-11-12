@@ -33,8 +33,8 @@ test('label names come out of objects and plain strings alike', () => {
 });
 
 test('only the allowlisted account, both as actor and as triggering actor', () => {
-  assert.equal(k.BOT_LOGIN, 'nueveonce-estado[bot]');
+  assert.equal(k.BOT_LOGIN, 'nueveonce-status[bot]');
   assert.doesNotThrow(() => k.autorizar({ GITHUB_ACTOR: 'fcastro-nueveonce', GITHUB_TRIGGERING_ACTOR: 'fcastro-nueveonce' }));
-  assert.throws(() => k.autorizar({ GITHUB_ACTOR: 'fcastro-nueveonce', GITHUB_TRIGGERING_ACTOR: 'nueveonce-estado[bot]' }), /no está autorizada/);
+  assert.throws(() => k.autorizar({ GITHUB_ACTOR: 'fcastro-nueveonce', GITHUB_TRIGGERING_ACTOR: 'nueveonce-status[bot]' }), /no está autorizada/);
   assert.throws(() => k.autorizar({}), /no está autorizada/);
 });

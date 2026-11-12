@@ -93,5 +93,5 @@ jobs:
           github_token: ${{ steps.deploy_token.outputs.token }}
           publish_dir: ${{ steps.site.outputs.download-path }}
           force_orphan: "false"
-          user_name: "nueveonce-estado[bot]"
-          user_email: "355641071+nueveonce-estado[bot]@users.noreply.github.com"
+          user_name: "nueveonce-status[bot]"
+          user_email: "355641071+nueveonce-status[bot]@users.noreply.github.com"

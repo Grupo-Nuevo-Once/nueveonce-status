@@ -42,8 +42,8 @@ const HOSTS_COMPONENTES = Object.freeze([
 // page renders the comments of that repository's issues as raw HTML, so another owner or
 // repository would publish on this page whatever anyone writes there.
 const PROPIETARIO = 'Grupo-Nuevo-Once';
-const REPOSITORIO = 'status';
-const BASE_URL = '/status';
+const REPOSITORIO = 'nueveonce-status';
+const BASE_URL = '/nueveonce-status';
 const HOST_PAGINA = 'grupo-nuevo-once.github.io';
 // The company's public contact page, the page's "Soporte" link. The only company host besides the
 // components: allowed in page links and as a mention, never as a monitored site.
