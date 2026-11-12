@@ -189,7 +189,7 @@ i18n:
   ms: " ms"
   loading: Cargando…
   navGitHub: GitHub
-  footer: "Página de estado de NueveOnce. [Código abierto]($REPO), basado en [Upptime](https://upptime.js.org)."
+  footer: ""
   rateLimitExceededTitle: Demasiadas consultas
   rateLimitExceededIntro: Desde tu conexión se hicieron demasiadas consultas en poco tiempo, así que por ahora no podemos mostrar el estado de los servicios.
   rateLimitExceededWhatDoesErrorMean: "¿Qué significa?"
