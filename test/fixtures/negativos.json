@@ -39,6 +39,8 @@
     { "archivo": "configs/repositorio-owner.yml", "tipo": "config", "reglas": ["repositorio"] },
     { "archivo": "configs/repositorio-repo.yml", "tipo": "config", "reglas": ["repositorio"] },
     { "archivo": "configs/repositorio-base.yml", "tipo": "config", "reglas": ["repositorio"] },
+    { "archivo": "configs/dominio.yml", "tipo": "config", "reglas": [] },
+    { "archivo": "configs/dominio-otro.yml", "tipo": "config", "reglas": ["repositorio"] },
     { "archivo": "configs/mensajes-commit.yml", "tipo": "config", "reglas": ["mensajes-commit"] },
     { "archivo": "configs/mensajes-commit-autor.yml", "tipo": "config", "reglas": ["mensajes-commit"] },
     { "archivo": "configs/idioma.yml", "tipo": "config", "reglas": ["idioma"] },

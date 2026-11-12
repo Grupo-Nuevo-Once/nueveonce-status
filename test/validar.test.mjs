@@ -297,8 +297,43 @@ test('names under the company domain must be public components, comments include
 test('keys outside the allowlists are refused', () => {
   assert.deepEqual(reglas(conSitio((s) => (s.tags = ['manual']))), ['campos']);
   assert.deepEqual(reglas(conSitio((s) => (s.__dangerous__insecure = true))), ['campos']);
-  assert.deepEqual(reglas(con((c) => (c['status-website'].cname = 'status.example.com'))), ['campos']);
   assert.deepEqual(reglas(con((c) => (c.customStatusWebsitePackage = 'otro-paquete'))), ['campos']);
+});
+
+// The page on its own domain: cname set to that domain and no baseUrl, since GitHub Pages then
+// serves the site from the domain's root.
+function conDominio(config) {
+  const pagina = config['status-website'];
+  delete pagina.baseUrl;
+  pagina.cname = 'status.nueveonce.com';
+  pagina.links[0].href = 'https://status.nueveonce.com/estado-es.css';
+  pagina.scripts[0].src = 'https://status.nueveonce.com/estado-es.js';
+}
+
+test('the page may move to its own domain, and only to status.nueveonce.com', () => {
+  assert.deepEqual(reglas(con(conDominio)), []);
+  // Any other domain would hand the page, and github.io's redirect, to whoever controls it.
+  const otros = ['status.example.com', 'nueveonce.com', 'Status.nueveonce.com', '', true];
+  for (const cname of otros) {
+    assert.deepEqual(reglas(con((c) => { conDominio(c); c['status-website'].cname = cname; })), ['repositorio'], String(cname));
+  }
+  // A domain and a path at once: the domain's site is served from its root.
+  for (const baseUrl of ['/nueveonce-status', '/']) {
+    assert.deepEqual(reglas(con((c) => { conDominio(c); c['status-website'].baseUrl = baseUrl; })), ['repositorio'], baseUrl);
+  }
+});
+
+test('scripts and styles load from where the page is served', () => {
+  const enGithub = 'https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.js';
+  assert.deepEqual(reglas(con((c) => { conDominio(c); c['status-website'].scripts[0].src = enGithub; })), ['host']);
+  assert.deepEqual(reglas(con((c) => (c['status-website'].scripts[0].src = 'https://status.nueveonce.com/estado-es.js'))), ['host']);
+  // The other page URLs may name either host: github.io redirects to the domain.
+  const logo = (url) => (c) => { conDominio(c); c['status-website'].logoUrl = url; };
+  assert.deepEqual(reglas(con(logo('https://status.nueveonce.com/logo-nueveonce.svg'))), []);
+  assert.deepEqual(reglas(con(logo('https://grupo-nuevo-once.github.io/nueveonce-status/logo-nueveonce.svg'))), []);
+  assert.deepEqual(reglas(conSitio((s) => (s.headers[0] = 'User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)'))), []);
+  // Named anywhere in the file, the page's domain is not an internal name.
+  assert.deepEqual(reglas(base(), { texto: 'cname: status.nueveonce.com' }), []);
 });
 
 test('merge keys and parser disagreements', () => {
