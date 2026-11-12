@@ -32,9 +32,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: '"status":"ok"'
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/signo.png
+    icon: https://status.nueveonce.com/iconos/signo.png
   - name: Dashboard SIGNO
     slug: dashboard-signo
     url: https://signo.nueveonce.com/
@@ -45,9 +45,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "<title>SIGNO</title>"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/signo.png
+    icon: https://status.nueveonce.com/iconos/signo.png
   - name: API de integraciones
     slug: api-integraciones
     url: https://integrations.nueveonce.com/integrations/v1/health
@@ -58,9 +58,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: '"status":"ok"'
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
   - name: Portal de desarrolladores
     slug: portal-desarrolladores
     url: https://developers.nueveonce.com/
@@ -71,9 +71,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "NueveOnce Developers"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
   - name: Telemedicina (web)
     slug: telemedicina-web
     url: https://telemedicine.nueveonce.com/
@@ -84,9 +84,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "NueveOnce Telemedicina"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
   # The page title has an accent; the check uses an unaccented substring of it.
   - name: Aquí Contigo (web)
     slug: aqui-contigo-web
@@ -98,9 +98,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "Contigo</title>"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
   - name: App web de pacientes
     slug: app-pacientes-web
     url: https://app.nueveonce.com/
@@ -111,9 +111,9 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "<title>Nueve once</title>"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
   - name: Encuestas
     slug: encuestas
     url: https://encuestas.nueveonce.com/
@@ -124,22 +124,22 @@ sites:
     requestTimeout: 10
     maxRetries: 2
     headers:
-      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://status.nueveonce.com/)"
     __dangerous__body_down_if_text_missing: "<title>Encuesta NueveOnce</title>"
-    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/nueveonce.png
+    icon: https://status.nueveonce.com/iconos/nueveonce.png
 
 # No theme key: the site follows the visitor's light or dark preference.
 status-website:
-  baseUrl: /nueveonce-status
+  cname: status.nueveonce.com
   name: Estado de NueveOnce
   introTitle: Estado de los servicios de NueveOnce
   introMessage: Revisamos nuestras plataformas automáticamente cada pocos minutos. Aquí puedes consultar su disponibilidad, los incidentes y los mantenimientos programados.
-  logoUrl: https://grupo-nuevo-once.github.io/nueveonce-status/logo-nueveonce.svg
-  favicon: https://grupo-nuevo-once.github.io/nueveonce-status/favicon.png
-  faviconSvg: https://grupo-nuevo-once.github.io/nueveonce-status/favicon.svg
+  logoUrl: https://status.nueveonce.com/logo-nueveonce.svg
+  favicon: https://status.nueveonce.com/favicon.png
+  faviconSvg: https://status.nueveonce.com/favicon.svg
   navbar:
     - title: Estado
-      href: https://grupo-nuevo-once.github.io/nueveonce-status/
+      href: https://status.nueveonce.com/
     - title: Soporte
       href: "https://www.nueveonce.com/contacto"
   productionCacheTime: 300000
@@ -151,9 +151,9 @@ status-website:
       content: noindex
   links:
     - rel: stylesheet
-      href: https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.css
+      href: https://status.nueveonce.com/estado-es.css
   scripts:
-    - src: https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.js
+    - src: https://status.nueveonce.com/estado-es.js
 
 # Every key read by @upptime/status-page 1.17.0 (its i18n.yml) and by the README
 # summary of uptime-monitor 1.46.5 (src/summary.ts). Upptime fills in the
