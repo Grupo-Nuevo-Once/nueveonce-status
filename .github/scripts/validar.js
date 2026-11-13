@@ -53,11 +53,14 @@ const DOMINIO_PAGINA = 'status.nueveonce.com';
 // components and the page's domain: allowed in page links and as a mention, never as a monitored
 // site.
 const HOST_SOPORTE = 'www.nueveonce.com';
-// The support mailbox, behind the page's "Avisos por correo" link. A mailto to it with exactly this
-// subject, as the href of a navbar entry, is the only link that is not https, and that whole link
-// is the only place the bare company domain may appear in the file.
-const CORREO_SOPORTE = 'soporte@nueveonce.com';
-const ENLACE_AVISOS = `mailto:${CORREO_SOPORTE}?subject=Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce`;
+// The mailboxes the page's "Avisos por correo" link may open: the one that receives the requests,
+// and the support one the link opened first, kept so the link can go back to it without a change
+// here. A mailto to one of them with exactly this subject, as the href of a navbar entry, is the
+// only link that is not https, and those whole links are the only places the bare company domain
+// may appear in the file.
+const CORREOS_AVISOS = Object.freeze(['josuna@nueveonce.com', 'soporte@nueveonce.com']);
+const ASUNTO_AVISOS = 'Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce';
+const ENLACES_AVISOS = Object.freeze(CORREOS_AVISOS.map((correo) => `mailto:${correo}?subject=${ASUNTO_AVISOS}`));
 const RUTA_PAGINA = `${BASE_URL}/`;
 // Hosts a site may point at, in its URL or in any other field. Compared exactly.
 const HOSTS_SITIOS = Object.freeze([...HOSTS_COMPONENTES, HOST_PAGINA, DOMINIO_PAGINA]);
@@ -351,7 +354,7 @@ function esClaveUrl(ruta) {
   return typeof ultima === 'string' && CLAVES_URL.includes(ultima);
 }
 
-// status-website.navbar[<n>].href, the only place the support mailto may go.
+// status-website.navbar[<n>].href, the only place an "Avisos por correo" mailto may go.
 function esEnlaceDelMenu(ruta) {
   return (
     ruta.length === 4 &&
@@ -391,7 +394,7 @@ function origenPagina(config) {
 function validarUrlCompleta(valor, ruta, permitidos, reportar, origen = origenPagina(null)) {
   const donde = rutaComoTexto(ruta);
   if (MARCADORES.includes(valor)) return;
-  if (valor === ENLACE_AVISOS && esEnlaceDelMenu(ruta)) return;
+  if (ENLACES_AVISOS.includes(valor) && esEnlaceDelMenu(ruta)) return;
   const parsed = parsearUrl(valor);
   if (!parsed || parsed.protocol !== 'https:' || parsed.username || parsed.password || !/^https:\/\//i.test(valor)) {
     reportar('url', `${donde}: ${mostrar(valor)} no es una URL https completa.`);
@@ -616,12 +619,17 @@ function validarConfig(config, componentes, reportar) {
   }
 }
 
+// The text with each exact copy of an "Avisos por correo" link replaced by a space.
+function sinEnlacesDeAvisos(texto) {
+  return ENLACES_AVISOS.reduce((resto, enlace) => resto.split(enlace).join(' '), String(texto));
+}
+
 // Names under the company domain that are not public components, in the raw text so that YAML
-// comments count too. The support link is not such a name, so each exact copy of it goes first;
-// the address anywhere else still counts.
+// comments count too. The "Avisos por correo" links are not such names, so each exact copy of one
+// goes first; their addresses anywhere else still count.
 function validarMenciones(texto, reportar) {
   const vistas = new Set();
-  for (const mencion of String(texto).split(ENLACE_AVISOS).join(' ').match(MENCION_DOMINIO) || []) {
+  for (const mencion of sinEnlacesDeAvisos(texto).match(MENCION_DOMINIO) || []) {
     const host = mencion.toLowerCase();
     if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || host === DOMINIO_PAGINA || vistas.has(host)) continue;
     vistas.add(host);
