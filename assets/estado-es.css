@@ -412,20 +412,33 @@ a {
   }
 }
 
+/* Below this width the links do not fit next to the logo: they move to a row of their own, and
+   wrap if even that row is too narrow, so none of them ends up cut off at the edge. */
+@media (max-width: 900px) {
+  #sapper > nav .container {
+    flex-wrap: wrap;
+  }
+
+  #sapper > nav ul {
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 0 1rem;
   }
 
-  /* Room for the links: the title next to the logo hides from view but stays
-     the name of the logo link for screen readers. */
+  /* The title next to the logo hides from view but stays the name of the logo link for screen
+     readers. */
   #sapper > nav {
     padding-right: 0;
     padding-left: 0;
   }
 
   #sapper > nav ul a {
-    padding: 1.25rem 0.75rem;
+    padding: 0.875rem 0.625rem;
   }
 
   #sapper > nav .logo {

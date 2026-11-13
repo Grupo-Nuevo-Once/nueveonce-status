@@ -142,6 +142,8 @@ status-website:
       href: https://status.nueveonce.com/
     - title: Soporte
       href: "https://www.nueveonce.com/contacto"
+    - title: Avisos por correo
+      href: "mailto:soporte@nueveonce.com?subject=Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce"
   productionCacheTime: 300000
   metaTags:
     - name: description
