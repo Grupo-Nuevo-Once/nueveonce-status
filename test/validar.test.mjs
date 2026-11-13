@@ -294,6 +294,22 @@ test('names under the company domain must be public components, comments include
   assert.deepEqual(reglas(base(), { texto: 'nueveonce.community' }), []);
 });
 
+test('"Avisos por correo": a mailto to either mailbox, with the exact subject, only as a navbar href', () => {
+  const asunto = 'Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce';
+  for (const correo of ['josuna@nueveonce.com', 'soporte@nueveonce.com']) {
+    const enlace = `mailto:${correo}?subject=${asunto}`;
+    assert.deepEqual(reglas(con((c) => (c['status-website'].navbar[2].href = enlace)), { texto: enlace }), [], correo);
+    assert.deepEqual(reglas(con((c) => (c['status-website'].logoUrl = enlace)), { texto: enlace }), ['url'], correo);
+    const conCopia = `${enlace}&bcc=alguien@example.org`;
+    assert.deepEqual(reglas(con((c) => (c['status-website'].navbar[2].href = conCopia)), { texto: conCopia }), ['url'], correo);
+    // The address alone, anywhere else, is a name under the company domain.
+    assert.deepEqual(reglas(base(), { texto: `# Escribe a ${correo}` }), ['host'], correo);
+  }
+  // Any other mailbox is refused like any other link that is not https.
+  const otro = `mailto:alguien@example.org?subject=${asunto}`;
+  assert.deepEqual(reglas(con((c) => (c['status-website'].navbar[2].href = otro)), { texto: otro }), ['url']);
+});
+
 test('keys outside the allowlists are refused', () => {
   assert.deepEqual(reglas(conSitio((s) => (s.tags = ['manual']))), ['campos']);
   assert.deepEqual(reglas(conSitio((s) => (s.__dangerous__insecure = true))), ['campos']);
