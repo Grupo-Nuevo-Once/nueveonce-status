@@ -150,6 +150,10 @@ const MOTIVO_NOMBRE =
 // definition "[name]: target", alone on its line, gives its target to any "[name]" of the text.
 const DESTINO_ENLACE = /\]\(([^)]*)/g;
 const DEFINICION_ENLACE = /^\[(.+?)\]:\s*(.+)$/gm;
+// An HTML character reference: "&#" starts a numeric one, with or without its ";", and "&name;" a
+// named one. The page's HTML turns it into the character it names ("&#46;" and "&period;" into
+// a dot) after every rule here has read the text.
+const REFERENCIA_DE_CARACTER = /&(?:#|[A-Za-z][A-Za-z0-9]*;)/;
 // The footer's placeholder for this repository's address (_layout.svelte).
 const MARCADOR_REPO = '$REPO';
 
@@ -354,6 +358,24 @@ function esClaveUrl(ruta) {
   return typeof ultima === 'string' && CLAVES_URL.includes(ultima);
 }
 
+// The path of the URL key that holds this leaf inside a list or a map, or null when the leaf is
+// not under one. The page turns such a value into text and uses it as the URL (["//host/x.js"]
+// becomes "//host/x.js"), and no URL rule would read it as one.
+function claveUrlContenedora(ruta) {
+  for (let i = ruta.length - 2; i >= 0; i -= 1) {
+    if (typeof ruta[i] === 'string' && CLAVES_URL.includes(ruta[i])) return ruta.slice(0, i + 1);
+  }
+  return null;
+}
+
+// A URL key that holds a list or a map, reported once per key.
+function reportarUrlNoTexto(contenedora, reportadas, reportar) {
+  const donde = rutaComoTexto(contenedora);
+  if (reportadas.has(donde)) return;
+  reportadas.add(donde);
+  reportar('url', `${donde} debe ser una sola URL escrita como texto, no una lista ni un mapa: la página lo convertiría en texto y lo usaría como URL sin pasar por estas reglas.`);
+}
+
 // status-website.navbar[<n>].href, the only place an "Avisos por correo" mailto may go.
 function esEnlaceDelMenu(ruta) {
   return (
@@ -419,15 +441,19 @@ function validarUrlsEnTexto(hoja, permitidos, reportar) {
   }
 }
 
-// A text outside "sites" carries no markup: no "<" or ">", and every link, image or reference
-// definition points at the footer's $REPO or at a plain https URL, as the sanitizer defines it,
-// on an allowed host. The host is the one of the target exactly as written, which is what
-// snarkdown puts in the attribute: the URLs found in the text lose their trailing punctuation
-// first, so "](https://upptime.js.org!)" passes that check with a host the page never meant.
+// A text outside "sites" carries no markup: no "<" or ">", no character reference, and every
+// link, image or reference definition points at the footer's $REPO or at a plain https URL, as
+// the sanitizer defines it, on an allowed host. The host is the one of the target exactly as
+// written, which is what snarkdown puts in the attribute: the URLs found in the text lose their
+// trailing punctuation first, so "](https://upptime.js.org!)" passes that check with a host the
+// page never meant.
 function validarMarcado(hoja, reportar) {
   const donde = rutaComoTexto(hoja.ruta);
   if (/[<>]/.test(hoja.texto)) {
     reportar('marcado', `${donde}: ${mostrar(hoja.texto)} contiene "<" o ">"; la página muestra este texto como HTML.`);
+  }
+  if (REFERENCIA_DE_CARACTER.test(hoja.texto)) {
+    reportar('marcado', `${donde}: ${mostrar(hoja.texto)} contiene una referencia de carácter HTML ("&#…" o "&nombre;"); la página muestra este texto como HTML y la convertiría en otro carácter.`);
   }
   const destinos = [
     ...[...hoja.texto.matchAll(DESTINO_ENLACE)].map((m) => m[1]),
@@ -460,11 +486,17 @@ function validarSitio(sitio, i, componentes, reportar) {
   }
   validarClaves(sitio, CLAVES_SITIO, `${donde}.`, reportar);
 
+  const noTexto = new Set();
   for (const hoja of hojas(sitio, ['sites', i])) {
     // uptime-monitor replaces "$NAME" in site fields with environment variables, and its token
     // is one of them: a "$" could send the token to whatever host the site requests.
     if (hoja.texto.includes('$')) {
       reportar('dolar', `${rutaComoTexto(hoja.ruta)}: los campos de un sitio no pueden contener "$" (uptime-monitor lo reemplaza por variables de entorno, entre ellas su token).`);
+    }
+    const contenedora = claveUrlContenedora(hoja.ruta);
+    if (contenedora) {
+      reportarUrlNoTexto(contenedora, noTexto, reportar);
+      continue;
     }
     if (hoja.esClave) continue;
     if (esClaveUrl(hoja.ruta)) {
@@ -605,10 +637,16 @@ function validarConfig(config, componentes, reportar) {
   // Everything outside "sites" ends up on the page too. Only "status-website" has URL-valued
   // keys; elsewhere ("i18n" included, which has a "url" label) values are display text.
   const origen = origenPagina(config);
+  const noTexto = new Set();
   for (const [clave, valor] of Object.entries(config)) {
     if (clave === 'sites') continue;
     for (const hoja of hojas(valor, [clave])) {
       validarMarcado(hoja, reportar);
+      const contenedora = clave === 'status-website' ? claveUrlContenedora(hoja.ruta) : null;
+      if (contenedora) {
+        reportarUrlNoTexto(contenedora, noTexto, reportar);
+        continue;
+      }
       if (hoja.esClave) continue;
       if (clave === 'status-website' && esClaveUrl(hoja.ruta)) {
         validarUrlCompleta(hoja.texto, hoja.ruta, HOSTS_CONFIG, reportar, origen);
@@ -624,16 +662,20 @@ function sinEnlacesDeAvisos(texto) {
   return ENLACES_AVISOS.reduce((resto, enlace) => resto.split(enlace).join(' '), String(texto));
 }
 
-// Names under the company domain that are not public components, in the raw text so that YAML
-// comments count too. The "Avisos por correo" links are not such names, so each exact copy of one
-// goes first; their addresses anywhere else still count.
-function validarMenciones(texto, reportar) {
+// Names under the company domain that are not public components. They are searched in the raw
+// text, so that YAML comments count too, and in every key and value as the parser reads them, so
+// that an escape in a quoted text ("nueveonce\x2ecom", or a "\" that joins two lines) does not
+// hide one. The "Avisos por correo" links are not such names, so each exact copy of one goes
+// first; their addresses anywhere else still count.
+function validarMenciones(textos, reportar) {
   const vistas = new Set();
-  for (const mencion of sinEnlacesDeAvisos(texto).match(MENCION_DOMINIO) || []) {
-    const host = mencion.toLowerCase();
-    if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || host === DOMINIO_PAGINA || vistas.has(host)) continue;
-    vistas.add(host);
-    reportar('host', `${mostrar(mencion)} no es uno de los componentes públicos; no escribas otros nombres del dominio.`);
+  for (const texto of textos) {
+    for (const mencion of sinEnlacesDeAvisos(texto).match(MENCION_DOMINIO) || []) {
+      const host = mencion.toLowerCase();
+      if (HOSTS_COMPONENTES.includes(host) || host === HOST_SOPORTE || host === DOMINIO_PAGINA || vistas.has(host)) continue;
+      vistas.add(host);
+      reportar('host', `${mostrar(mencion)} no es uno de los componentes públicos; no escribas otros nombres del dominio.`);
+    }
   }
 }
 
@@ -671,7 +713,8 @@ function validarTextoConfig(texto, yamlMonitor, yamlPagina, componentes = COMPON
     return [{ regla: 'yaml', mensaje: `js-yaml 4.3.2 no pudo leer el archivo: ${primeraLinea(error.message)}` }];
   }
   try {
-    validarMenciones(texto, reportar);
+    // The parsers' documents differ only where the "parsers" rule already refuses the file.
+    validarMenciones([texto, ...Array.from(hojas(monitor, []), (hoja) => hoja.texto)], reportar);
     validarConfig(monitor, componentes, reportar);
     compararParsers(monitor, pagina, reportar);
   } catch (error) {

@@ -1,0 +1,79 @@
+# Negative fixture for the checker: valida.yml with one change. A name under the company domain that is not a public component, with its last dot written as a YAML escape, so that only the parsed value spells it.
+owner: Grupo-Nuevo-Once
+repo: nueveonce-status
+assignees: []
+secrets: []
+skipDeleteIssues: true
+commitMessages:
+  commitAuthorName: "nueveonce-status[bot]"
+  commitAuthorEmail: "__BOT_USER_ID__+nueveonce-status[bot]@users.noreply.github.com"
+sites:
+  - name: API SIGNO
+    slug: api-signo
+    url: https://api.signo.nueveonce.com/api/health/ready
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    headers:
+      - "User-Agent: NueveOnce-Estado/1.0 (+https://grupo-nuevo-once.github.io/nueveonce-status/)"
+    __dangerous__body_down_if_text_missing: '"status":"ok"'
+    icon: https://grupo-nuevo-once.github.io/nueveonce-status/iconos/signo.png
+  - name: Dashboard SIGNO
+    slug: dashboard-signo
+    url: https://signo.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "<title>SIGNO</title>"
+  - name: API de integraciones
+    slug: api-integraciones
+    url: https://integrations.nueveonce.com/integrations/v1/health
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: '"status":"ok"'
+  - name: Portal de desarrolladores
+    slug: portal-desarrolladores
+    url: https://developers.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "NueveOnce Developers"
+  - name: Telemedicina (web)
+    slug: telemedicina-web
+    url: https://telemedicine.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "NueveOnce Telemedicina"
+  - name: Aquí Contigo (web)
+    slug: aqui-contigo-web
+    url: https://aquicontigo.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "Contigo</title>"
+  - name: App web de pacientes
+    slug: app-pacientes-web
+    url: https://app.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "<title>Nueve once</title>"
+  - name: Encuestas
+    slug: encuestas
+    url: https://encuestas.nueveonce.com/
+    expectedStatusCodes: [200]
+    maxRedirects: 0
+    __dangerous__body_down_if_text_missing: "<title>Encuesta NueveOnce</title>"
+status-website:
+  baseUrl: /nueveonce-status
+  name: Estado de NueveOnce
+  introMessage: "Más detalles en ejemplo.nueveonce\x2ecom"
+  logoUrl: https://grupo-nuevo-once.github.io/nueveonce-status/logo-nueveonce.svg
+  navbar:
+    - title: Estado
+      href: https://grupo-nuevo-once.github.io/nueveonce-status/
+    - title: Soporte
+      href: "__SUPPORT_URL__"
+  links:
+    - rel: stylesheet
+      href: https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.css
+  scripts:
+    - src: https://grupo-nuevo-once.github.io/nueveonce-status/estado-es.js
+i18n:
+  url: URL
+  footer: "Página de estado de NueveOnce. [Código abierto]($REPO), basado en [Upptime](https://upptime.js.org)."
