@@ -95,7 +95,8 @@ test('site URLs: plain https on an allowlisted host, compared exactly', () => {
     ['https://api.signo.nueveonce.com/api/health/ready#x', ['url']],
     ['https://api.signo.nueveonce.com@example.com/', ['url']],
     ['https://api.signo.nueveonce.com\\@example.com/', ['url']],
-    ['https://api%2esigno.nueveonce.com/', ['url']],
+    // The value also names "2esigno.nueveonce.com", which is not a component.
+    ['https://api%2esigno.nueveonce.com/', ['host', 'url']],
     ['https://api.signo.nueveonce.com/ ', ['url']],
     ['https://example.com/', ['host']],
     ['https://api.signo.nueveonce.com.example.com/', ['host']],
@@ -137,6 +138,26 @@ test('page fields: URL-valued keys are complete https URLs; scripts and styles c
   assert.deepEqual(pagina((p) => (p.scripts[0].src = 'https://github.com/x.js')), ['host']);
   assert.deepEqual(pagina((p) => (p.links[0].href = 'https://grupo-nuevo-once.github.io/otro/x.css')), ['host']);
   assert.deepEqual(pagina((p) => (p.introMessage = 'Ver https://example.com/')), ['host']);
+});
+
+test('URL-valued keys hold one text, never a list or a map', () => {
+  const pagina = (cambio) => reglas(con((config) => cambio(config['status-website'])));
+  // The page turns the value into text ("//example.com/x.js") and uses it as the URL.
+  assert.deepEqual(pagina((p) => (p.scripts[0].src = ['//example.com/x.js'])), ['url']);
+  assert.deepEqual(pagina((p) => (p.scripts[0].src = [['//example.com/x.js']])), ['url']);
+  assert.deepEqual(pagina((p) => (p.navbar[0].href = ['javascript:alert(1)'])), ['url']);
+  assert.deepEqual(pagina((p) => (p.logoUrl = { a: '//example.com/logo.svg' })), ['url']);
+  assert.deepEqual(pagina((p) => (p.links[0].href = { '//example.com/x.css': null })), ['url']);
+  // Even a list holding a URL that passes as text.
+  assert.deepEqual(pagina((p) => (p.links[0].href = [p.links[0].href])), ['url']);
+  assert.deepEqual(reglas(conSitio((s) => (s.icon = ['//example.com/i.png']))), ['url']);
+  assert.deepEqual(reglas(conSitio((s) => (s.icon = { '//example.com/i.png': true }))), ['url']);
+  // One message per key, however many values it holds.
+  const config = con((c) => (c['status-website'].scripts[0].src = ['//example.com/a.js', '//example.com/b.js']));
+  const errores = v.validarTextoConfig('', parser(config), parser(config), COMPONENTES);
+  assert.equal(errores.filter((e) => e.regla === 'url').length, 1);
+  // i18n is display text: its "url" label is not a URL key.
+  assert.deepEqual(reglas(con((c) => (c.i18n.url = ['URL']))), []);
 });
 
 test('i18n is display text: a "url" label is not a URL, but links inside the text are checked', () => {
@@ -227,6 +248,13 @@ test('texts outside the sites: no "<" or ">", and links only to https URLs or $R
     [(c) => (c.i18n.footer = 'Basado en [Upptime](https://upptime.js.org!).'), ['host']],
     [(c) => (c.i18n.footer = 'Basado en [Upptime](https://upptime.js.org.).'), ['host']],
     [(c) => (c['status-website'].introMessage = 'Ver [detalle].\n[detalle]: https://upptime.js.org!'), ['host']],
+    // The page's HTML turns a character reference back into the character it names, after the
+    // rules have read the text: "&#46;" and "&period;" are dots, with or without the ";" for a
+    // numeric one.
+    [(c) => (c['status-website'].introMessage = 'Ver ejemplo&#46;nueveonce&#46;com'), ['marcado']],
+    [(c) => (c.i18n.footer = 'Ver ejemplo&period;nueveonce&period;com'), ['marcado']],
+    [(c) => (c.i18n.footer = 'Ver ejemplo.nueveonce&#x2E;com'), ['marcado']],
+    [(c) => (c.i18n.footer = 'Ver ejemplo.nueveonce&#46com'), ['marcado']],
   ];
   for (const [cambio, esperadas] of casos) {
     const config = con(cambio);
@@ -238,6 +266,9 @@ test('texts outside the sites: no "<" or ">", and links only to https URLs or $R
     (c) => (c['status-website'].introMessage = 'Consulta [el estado](https://grupo-nuevo-once.github.io/nueveonce-status/) cuando quieras.'),
     (c) => (c.i18n.incidentBack = '← Volver al inicio'),
     (c) => (c.i18n.footer = 'Ver [la guía](https://upptime.js.org/docs/), [el código]($REPO).'),
+    // An "&" that starts no reference.
+    (c) => (c.i18n.footer = 'Investigación y desarrollo (I+D, R&D)'),
+    (c) => (c['status-website'].navbar[2].href = 'https://github.com/Grupo-Nuevo-Once/nueveonce-status/issues?q=is%3Aissue&state=closed'),
   ];
   for (const cambio of permitidos) assert.deepEqual(reglas(con(cambio)), []);
   // A site's body check is raw HTML on purpose; it never reaches the page.
@@ -292,6 +323,15 @@ test('names under the company domain must be public components, comments include
   assert.deepEqual(reglas(base(), { texto: 'ver NUEVEONCE.COM' }), ['host']);
   assert.deepEqual(reglas(base(), { texto: 'x.api.signo.nueveonce.com' }), ['host']);
   assert.deepEqual(reglas(base(), { texto: 'nueveonce.community' }), []);
+  // Every key and value as the parser reads it counts too: an escape in the raw text
+  // ("nueveonce\x2ecom") hides the name from the first reading, not from the parser. These
+  // cases pass no raw text at all.
+  assert.deepEqual(reglas(con((c) => (c['status-website'].introMessage = 'Ver ejemplo.nueveonce.com'))), ['host']);
+  assert.deepEqual(reglas(con((c) => (c.i18n['ejemplo.nueveonce.com'] = 'x'))), ['host']);
+  assert.deepEqual(reglas(con((c) => (c['status-website'].introMessage = 'Escribe a soporte@nueveonce.com'))), ['host']);
+  // The exact support link is not a name, read either way.
+  const enlace = 'mailto:soporte@nueveonce.com?subject=Quiero%20recibir%20los%20avisos%20de%20estado%20de%20NueveOnce';
+  assert.deepEqual(reglas(con((c) => (c['status-website'].navbar[2].href = enlace)), { texto: enlace }), []);
 });
 
 test('"Avisos por correo": a mailto to either mailbox, with the exact subject, only as a navbar href', () => {
@@ -329,9 +369,16 @@ function conDominio(config) {
 test('the page may move to its own domain, and only to status.nueveonce.com', () => {
   assert.deepEqual(reglas(con(conDominio)), []);
   // Any other domain would hand the page, and github.io's redirect, to whoever controls it.
-  const otros = ['status.example.com', 'nueveonce.com', 'Status.nueveonce.com', '', true];
-  for (const cname of otros) {
-    assert.deepEqual(reglas(con((c) => { conDominio(c); c['status-website'].cname = cname; })), ['repositorio'], String(cname));
+  const otros = [
+    ['status.example.com', ['repositorio']],
+    // The bare company domain is also a name that is not a public component.
+    ['nueveonce.com', ['host', 'repositorio']],
+    ['Status.nueveonce.com', ['repositorio']],
+    ['', ['repositorio']],
+    [true, ['repositorio']],
+  ];
+  for (const [cname, esperadas] of otros) {
+    assert.deepEqual(reglas(con((c) => { conDominio(c); c['status-website'].cname = cname; })), esperadas, String(cname));
   }
   // A domain and a path at once: the domain's site is served from its root.
   for (const baseUrl of ['/nueveonce-status', '/']) {
