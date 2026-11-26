@@ -112,18 +112,20 @@
     "url": "https://app.nueveonce.com/",
     "icon": "https://status.nueveonce.com/iconos/nueveonce.png",
     "slug": "app-pacientes-web",
-    "status": "up",
+    "status": "down",
     "uptime": "100.00%",
-    "uptimeDay": "100.00%",
+    "uptimeDay": "99.99%",
     "uptimeWeek": "100.00%",
     "uptimeMonth": "100.00%",
     "uptimeYear": "100.00%",
-    "time": 211,
-    "timeDay": 117,
-    "timeWeek": 182,
-    "timeMonth": 211,
-    "timeYear": 211,
-    "dailyMinutesDown": {}
+    "time": 204,
+    "timeDay": 98,
+    "timeWeek": 169,
+    "timeMonth": 204,
+    "timeYear": 204,
+    "dailyMinutesDown": {
+      "2026-11-26": 0
+    }
   },
   {
     "name": "Encuestas",
